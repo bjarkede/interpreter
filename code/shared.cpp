@@ -1,11 +1,5 @@
 #include "shared.hpp"
 
-#include <malloc.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 File::File() : file_buffer(NULL) {};
 
 File::~File() {

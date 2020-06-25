@@ -1,7 +1,13 @@
-#pragma once
+#ifndef SHARED_HPP
+#define SHARED_HPP
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <malloc.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define s8 int8_t
 #define s16 int16_t
@@ -35,3 +41,5 @@ struct File {
 
 bool ReadEntireFile(Buffer& buffer, const char* filePath);
 bool AllocBuffer(Buffer& buffer, uptr bytes);
+
+#endif

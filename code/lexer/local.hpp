@@ -1,11 +1,16 @@
-#ifndef LOCAL_H
-#define LOCAL_H
+#ifndef LOCAL_HPP
+#define LOCAL_HPP
 
 #include "../shared.hpp"
-#include <stdio.h>
+#include <regex>
 
 typedef enum {
-	     
+	      TK_IDENTIFIER,
+	      TK_KEYWORD,
+	      TK_STRING,
+	      TK_LITERAL,
+	      TK_OPERATOR,
+	      TK_DELIM
 } token_t;
 
 
