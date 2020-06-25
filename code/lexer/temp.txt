@@ -1,0 +1,22 @@
+Lexical Analysis:
+
+The point of a lexer is to take a sequence of characters (in this case a program) and generate a sequence of tokens. This lexer is then combined with a parser that together generates the input to the interpreter (a syntax tree).
+
+We do not want to use a lexer generator, but instead write out own.
+
+Tokens:
+
+identifier: names the programmer chooses;
+keyword: names already in the programming language; 
+separator: punctuation characters and paired-delimeters;
+operator: symbols that operate on arguments and produce results;
+literals: numeric, logical, textual;
+comments: line, block.
+
+A lexer has too distinguish between several different types of tokens. Each of which are described by their own regular expression. A lexer does not check if its entire input is included in the languages defined by the regular expressions. Instead, it has to cur the input into pieces (tokens(, each of which is included in one of the languages. If there are several ways to split the input into legal tokens, the lexer has to decide which of these it should use.
+
+There are two approaches. One is to generate a DFA for each token definition and apply the DFAs one at a time to the input. This is slow. The other option is to create a single DFA that tests for all the tokens simultaneously.
+
+Optimization ideas:
+
+We will most likely end up using a DFA. Therefore we would like to eliminate as many branches as possible. Whenever the code has a branch, the CPU doesn't know which of the two branches need to be fed into the pipeline. If the wrong branch is fed, then it will take a sigificant amount of clock cycles before the error will be corrected. Therefore we want to keep the amount of branches and switch-statements to a small number. We have a number of options here like rolling out loops. We can also replace a poorly predictable branch by a table lookup.

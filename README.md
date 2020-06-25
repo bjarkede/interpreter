@@ -5,7 +5,7 @@ This is a work in progress interpreter that implements its own lexical- and synt
 ## Requirements
 
 * Windows x64
-* GNU Make or Visual Studio c++ 2013 or later for compiling
+* GNU Make or Visual Studio C++ 2013 or later for compiling
 
 ## Project breakdown
 

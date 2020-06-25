@@ -1,0 +1,7 @@
+Syntax analysis:
+
+
+
+Optimization ideas:
+
+An abstract syntax tree could be optimized by flattening the tree to a one-dimensional array where pointers to tree nodes are converted into integer offsets. This could make the interpretation of a program be faster, because visting the tree would be faster.
