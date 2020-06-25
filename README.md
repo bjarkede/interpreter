@@ -1,6 +1,6 @@
 # Presentation
 
-This is a work in progress interpreter that implements its own lexical- and syntaxanalysis, along with type-checking. The goal is to directly process the syntax tree to evaluate expressions, statements and so on.
+This is a work in progress interpreter that implements its own lexical- and syntax analysis, along with type-checking. The goal is to directly process the syntax tree to evaluate expressions, statements and so on.
 
 The goal is to try and make interpretation faster, and provide precise and informative error messages.
 
