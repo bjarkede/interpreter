@@ -1,0 +1,3 @@
+Ideas:
+
+Make it so you can enter line by line and get it interpreted. Kind of like python.
