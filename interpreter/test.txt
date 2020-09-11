@@ -1,2 +1,7 @@
 -1993 0-2 +13 2
 23 + 24 - 11
+
+firstVariable
+_secondVariable
+someMemeShit
+if 

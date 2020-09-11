@@ -3,9 +3,21 @@
 
 #include "shared.hpp"
 
+#define L_INTEGER int64_t
+
+typedef struct L_STRING {
+	u8 flags;
+	u8 length;
+	union {
+		size_t longLength;
+		struct L_STRING* nextHash; // ???
+	} u;
+	char* contents;
+} L_STRING;
+
 enum RESERVED {
 	TK_LET, TK_IF, TK_THEN, TK_ELSE, TK_IN, TK_END,
-	TK_TRUE, TK_FALSE, TK_NAME,
+	TK_TRUE, TK_FALSE, TK_VAR,
 	TK_EQ, TK_AND, TK_OR, TK_LE, TK_NOT,
 	TK_MIN, TK_MAX, TK_EOZ, TK_INT,
 	TK_COUNT
@@ -14,13 +26,14 @@ enum RESERVED {
 #define NUM_RESERVED ((int)(TK_COUNT));
 
 typedef union {
+	L_INTEGER i;
+	L_STRING* s;
 } SemanticInfo;
 
 typedef struct Token {
 	int token;
 	int line, col;
-	void* data;
-	// TODO: Add some semantic info?
+	SemanticInfo semInfo;
 } Token;
 
 typedef struct LexerState {

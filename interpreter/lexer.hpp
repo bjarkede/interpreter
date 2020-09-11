@@ -8,13 +8,15 @@
 bool ProcessCharacterSequence(char* filePath, LexerState* ls);
 bool InitializeLexerState(LexerState* ls, int firstChar);
 
-int Lex(LexerState* ls);
-int ReadNumeralLiteral(LexerState* ls);
+int Lex(LexerState* ls, SemanticInfo* semInfo);
+int ReadNumeralLiteral(LexerState* ls, SemanticInfo* semInfo);
+
 void InclineLineNumber(LexerState* ls);
 
 void SaveToken(LexerState* ls, int c);
 void ProcessNextToken(LexerState* ls);
 
 static bool StringToNumber(LexerState* ls, int* value);
+L_STRING* CreateVariableString(LexerState* ls, const char* str, size_t l);
 
 #endif

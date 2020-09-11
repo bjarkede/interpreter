@@ -41,11 +41,16 @@ static void ProcessNextToken(LexerState* ls) {
         ls->lookahead.token = TK_EOZ;
     }
     else {
-        ls->t.token = Lex(ls);
+        ls->t.token = Lex(ls, &ls->t.semInfo);
 
         switch (ls->t.token) {
         case TK_INT: {
             ls->t.line = ls->lineNumber;
+            printf("Token ID: TK_INT, Line: %d[%d], Data: %d\n", ls->lineNumber, ls->t.col, ls->t.semInfo.i);
+        } break;
+        case TK_VAR: {
+            ls->t.line = ls->lineNumber;
+            printf("Token ID: TK_VAR, Line: %d[%d], Data: %s\n", ls->lineNumber, ls->t.col, ls->t.semInfo.s->contents);
         } break;
         case TK_EOZ: {
             return;
@@ -55,14 +60,11 @@ static void ProcessNextToken(LexerState* ls) {
         }
 
         reset_buffer(ls);
-        
-        printf("Token ID: %d, Line: %d[%d], Data: %d\n", ls->t.token, ls->lineNumber, ls->t.col,(int)ls->t.data);
     }
 }
 
-static int Lex(LexerState* ls) {
+static int Lex(LexerState* ls, SemanticInfo* semInfo) {
     //ls->TBuffer.buffer = 0; // Maybe add more buffer functions to the struct.
-    ls->t.data = 0;
     for (;;) {
         switch (ls->currentChar) {
         case '\n': case '\r': {
@@ -77,27 +79,58 @@ static int Lex(LexerState* ls) {
         case '+': {
             save_and_next(ls);
             if (!isdigit(ls->currentChar)) return  '+';
-            return ReadNumeralLiteral(ls);
+            return ReadNumeralLiteral(ls, semInfo);
         } break;
         case '-': { 
             save_and_next(ls);
             if (!isdigit(ls->currentChar)) return  '-';
-            return ReadNumeralLiteral(ls);
+            return ReadNumeralLiteral(ls, semInfo);
         } break;
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9': {
-            return ReadNumeralLiteral(ls);
+            return ReadNumeralLiteral(ls, semInfo);
         } break;
         default:
-            int c = ls->currentChar;
-            next(ls);
-            return c;
+            if (isalpha(ls->currentChar) || ls->currentChar == '_') {
+                L_STRING* rs;
+
+                do {
+                    save_and_next(ls);
+                } while (isalnum(ls->currentChar));
+
+                rs = CreateVariableString(ls, (char*)ls->TBuffer.buffer, ls->TBuffer.length);
+                semInfo->s = rs;
+
+                //@TODO:
+                // Need to check if the string entered is a reservered keyword or not.
+                
+                return TK_VAR;
+            }
+            else {
+                int c = ls->currentChar;
+                next(ls);
+                return c;
+            }
         }
     }
 }
 
+static L_STRING* CreateVariableString(LexerState* ls, const char* str, size_t l) {
+    L_STRING* s = (L_STRING*)malloc(sizeof(L_STRING));
+
+    // Allocate memory for the string
+    s->contents = (char*)malloc(l);
+    s->length   = l;
+    s->flags    = 0;
+
+    // Copy the string from the token buffer to the L_STRING.
+    memcpy(s->contents, str, l * sizeof(char));
+    
+    return s;
+}
+
 // TODO:
-static int ReadNumeralLiteral(LexerState* ls) {
+static int ReadNumeralLiteral(LexerState* ls, SemanticInfo* semInfo) {
     int first = ls->currentChar;
     int value = 0;
 
@@ -113,8 +146,11 @@ static int ReadNumeralLiteral(LexerState* ls) {
 
     if (!StringToNumber(ls, &value)) FatalError("Failed when converting string to number.");
     
-    ls->t.data = (void*)value;
+    semInfo->i = value;
     return TK_INT;
+
+    //ls->t.data = (void*)value;
+    
 }
 
 static bool StringToNumber(LexerState* ls, int* value) {
