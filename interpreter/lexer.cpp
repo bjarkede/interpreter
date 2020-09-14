@@ -22,8 +22,20 @@ static bool InitializeLexerState(LexerState* ls, int firstChar) {
 static bool ProcessCharacterSequence(char* filePath, LexerState* ls) {
     if (ReadEntireFile(ls->IOZ, filePath)) {
         if (InitializeLexerState(ls, ((char*)ls->IOZ.buffer)[0])) {
+            PrintDebug("Tokens:\n");
             for (;;) {
                 ProcessNextToken(ls);
+                if (ls->t.token == TK_INT) {
+                    printf("Type: %d, Line: %d[%d ], Integer: [ %d ]\n", ls->t.token,
+                        ls->lineNumber,
+                        ls->t.col, ls->t.semInfo.i);
+                }
+                else {
+                    printf("Type: %d, Line: %d[%d ], Symbol: [ %s ]\n", ls->t.token,
+                        ls->lineNumber,
+                        ls->t.col,
+                        (ls->t.semInfo.s == NULL ? (char*)&ls->t.token : ls->t.semInfo.s->contents));
+                }
                 if (ls->t.token == TK_EOZ) return true;
             }
         }
@@ -31,40 +43,30 @@ static bool ProcessCharacterSequence(char* filePath, LexerState* ls) {
     else {
         return false;
     }
-    return true;
+    return true;    
 }
 
 static void ProcessNextToken(LexerState* ls) {
     ls->lastLine = ls->lineNumber;
-    if (ls->lookahead.token != TK_EOZ) {
+    if (ls->lookahead.token != TK_EOZ) {  // If there is a look-a-head token use that one.
         ls->t = ls->lookahead;
         ls->lookahead.token = TK_EOZ;
     }
-    else {
+    else { // Else get the next token.
         ls->t.token = Lex(ls, &ls->t.semInfo);
-
-        switch (ls->t.token) {
-        case TK_INT: {
-            ls->t.line = ls->lineNumber;
-            printf("Token ID: TK_INT, Line: %d[%d], Data: %d\n", ls->lineNumber, ls->t.col, ls->t.semInfo.i);
-        } break;
-        case TK_VAR: {
-            ls->t.line = ls->lineNumber;
-            printf("Token ID: TK_VAR, Line: %d[%d], Data: %s\n", ls->lineNumber, ls->t.col, ls->t.semInfo.s->contents);
-        } break;
-        case TK_EOZ: {
-            return;
-        }
-        default:
-            break;
-        }
-
         reset_buffer(ls);
     }
 }
 
+static int ProcessLookAHeadToken(LexerState* ls) {
+    assert(ls->lookahead.token == TK_EOZ);
+    ls->lookahead.token = Lex(ls, &ls->lookahead.semInfo);
+    return ls->lookahead.token;
+}
+
 static int Lex(LexerState* ls, SemanticInfo* semInfo) {
     //ls->TBuffer.buffer = 0; // Maybe add more buffer functions to the struct.
+    semInfo->s = 0;
     for (;;) {
         switch (ls->currentChar) {
         case '\n': case '\r': {
@@ -72,6 +74,14 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
         } break;
         case ' ': case '\f': case '\t': case '\v': {
             next(ls);
+        } break;
+        case '=': {
+            next(ls);
+            if (ls->currentChar == '=') {
+                next(ls);
+                return TK_EQ;
+            }
+            return '=';
         } break;
         case '\0': {
             return TK_EOZ;
@@ -98,15 +108,22 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
                     save_and_next(ls);
                 } while (isalnum(ls->currentChar));
 
+                SaveToken(ls, '\0');
+
                 rs = CreateVariableString(ls, (char*)ls->TBuffer.buffer, ls->TBuffer.length);
                 semInfo->s = rs;
 
-                //@TODO:
-                // Need to check if the string entered is a reservered keyword or not.
-                
-                return TK_VAR;
+                if (IsReserved(semInfo->s)) {
+                    // When checking to see if the string is a reserved keyword
+                    // the flag gets set as the token id.
+                    return semInfo->s->flags;
+                }
+                else {
+                    return TK_VAR;
+                }
             }
             else {
+                // Single-character tokens: (, +, -, ... 
                 int c = ls->currentChar;
                 next(ls);
                 return c;
@@ -115,17 +132,28 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
     }
 }
 
+static bool IsReserved(L_STRING* str) {
+    for (int i = 0; i < ARRAY_LEN(tokens); i++) {
+        if (strcmp(str->contents, tokens[i]) == 0) {
+            str->flags = i;
+            return true;
+        }
+    }
+    return false;
+}
+
 static L_STRING* CreateVariableString(LexerState* ls, const char* str, size_t l) {
     L_STRING* s = (L_STRING*)malloc(sizeof(L_STRING));
 
     // Allocate memory for the string
+    
     s->contents = (char*)malloc(l);
     s->length   = l;
     s->flags    = 0;
 
     // Copy the string from the token buffer to the L_STRING.
-    memcpy(s->contents, str, l * sizeof(char));
-    
+    memcpy((void*)s->contents, str, l * sizeof(char));
+
     return s;
 }
 

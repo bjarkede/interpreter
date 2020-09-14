@@ -25,6 +25,7 @@
 
 #define MINBUFFER 32
 #define EOZ (-1) // End of stream
+#define ARRAY_LEN(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 struct Buffer {
 	void* buffer;

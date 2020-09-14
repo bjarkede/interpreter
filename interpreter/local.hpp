@@ -12,15 +12,20 @@ typedef struct L_STRING {
 		size_t longLength;
 		struct L_STRING* nextHash; // ???
 	} u;
-	char* contents;
+	const char* contents;
 } L_STRING;
 
 enum RESERVED {
 	TK_LET, TK_IF, TK_THEN, TK_ELSE, TK_IN, TK_END,
-	TK_TRUE, TK_FALSE, TK_VAR,
-	TK_EQ, TK_AND, TK_OR, TK_LE, TK_NOT,
-	TK_MIN, TK_MAX, TK_EOZ, TK_INT,
+	TK_BOOL, TK_VAR, TK_INT,
+	TK_EQ, TK_ASSN, TK_AND, TK_OR, TK_LE, TK_MIN, TK_MAX, TK_MUL,
+	TK_SEPR, TK_SEPL, TK_COM,
+	TK_EOZ, 
 	TK_COUNT
+};
+
+static const char* const tokens[] = {
+	"let", "if", "then", "else", "in", "end", "true", "false"
 };
 
 #define NUM_RESERVED ((int)(TK_COUNT));

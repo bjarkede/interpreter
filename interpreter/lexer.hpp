@@ -15,8 +15,34 @@ void InclineLineNumber(LexerState* ls);
 
 void SaveToken(LexerState* ls, int c);
 void ProcessNextToken(LexerState* ls);
+int ProcessLookAHeadToken(LexerState* ls);
 
 static bool StringToNumber(LexerState* ls, int* value);
+static bool IsReserved(L_STRING* str);
 L_STRING* CreateVariableString(LexerState* ls, const char* str, size_t l);
+
+static const char* const tokenStrings[] = {
+	// Keywords
+	"let",
+	"if",
+	"then",
+	"else",
+	"in",
+	"end",
+
+	// Types
+	"BOOL",
+	"VAR",
+	"INT",
+
+	// Operators
+	"==", "=", "&&", "||", "<", "min", "max", "*",
+
+	// Seperators
+	"(", ")", ",",
+
+	// Others
+	"EOZ"
+};
 
 #endif
