@@ -11,6 +11,10 @@
 #include <cassert>
 #include <ctype.h>
 
+#include <set>
+#include <map>
+#include <vector>
+
 #define s8 int8_t
 #define s16 int16_t
 #define s32 int32_t

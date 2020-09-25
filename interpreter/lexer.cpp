@@ -1,5 +1,7 @@
 #include "local.hpp"
 #include "lexer.hpp"
+#include "ast.hpp"
+#include "interpreter.hpp"
 
 static bool InitializeLexerState(LexerState* ls, int firstChar) {
     ls->t = {};
@@ -25,6 +27,7 @@ static bool ProcessCharacterSequence(char* filePath, LexerState* ls) {
             PrintDebug("Tokens:\n");
             for (;;) {
                 ProcessNextToken(ls);
+
                 if (ls->t.token == TK_INT) {
                     printf("Type: %d, Line: %d[%d ], Integer: [ %d ]\n", ls->t.token,
                         ls->lineNumber,
@@ -36,6 +39,7 @@ static bool ProcessCharacterSequence(char* filePath, LexerState* ls) {
                         ls->t.col,
                         (ls->t.semInfo.s == NULL ? (char*)&ls->t.token : ls->t.semInfo.s->contents));
                 }
+       
                 if (ls->t.token == TK_EOZ) return true;
             }
         }
@@ -244,6 +248,11 @@ int main(int argc, char** argv) {
     }
 
     PrintDebug("Finished lexing file: %s\n", argv[1]);
+    PrintDebug("Testing AST Interpretation:\n");
+
+    AST_Node* e = BinaryExp('+', BinaryExp('*', IntegerExp(2), IntegerExp(5)), IntegerExp(5));
+
+    PrintDebug("Expression [%s] evaluates to: %d\n", toString(e).c_str(), eval(e).v.i);
 
     return 1;
 }

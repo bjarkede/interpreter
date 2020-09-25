@@ -4,6 +4,18 @@
 #include "shared.hpp"
 
 #define L_INTEGER int64_t
+#define L_BOOL bool
+
+typedef enum BinOp {
+	// Arithmetic
+	OP_ADD, OP_SUB, OP_MUL,
+	// Comparison
+	OP_EQ, OP_LT,
+	// Logical
+	OP_AND, OP_OR,
+	// Others
+	OP_SEL, OP_MIN, OP_MAX
+} BinOp;
 
 typedef struct L_STRING {
 	u8 flags;
@@ -19,7 +31,7 @@ enum RESERVED {
 	TK_LET, TK_IF, TK_THEN, TK_ELSE, TK_IN, TK_END,
 	TK_BOOL, TK_VAR, TK_INT,
 	TK_EQ, TK_ASSN, TK_AND, TK_OR, TK_LE, TK_MIN, TK_MAX, TK_MUL,
-	TK_SEPR, TK_SEPL, TK_COM,
+	TK_SEPR, TK_SEPL, TK_COM, TK_FUNC,
 	TK_EOZ, 
 	TK_COUNT
 };

@@ -139,12 +139,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ast.cpp" />
     <ClCompile Include="lexer.cpp" />
+    <ClCompile Include="parser.cpp" />
     <ClCompile Include="shared.cpp" />
+    <ClCompile Include="interpreter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ast.hpp" />
+    <ClInclude Include="interpreter.hpp" />
     <ClInclude Include="lexer.hpp" />
     <ClInclude Include="local.hpp" />
+    <ClInclude Include="parser.hpp" />
     <ClInclude Include="shared.hpp" />
   </ItemGroup>
   <ItemGroup>
