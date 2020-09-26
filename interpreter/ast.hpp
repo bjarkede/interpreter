@@ -3,41 +3,45 @@
 
 #include "local.hpp"
 
-struct AST_Node {
-	enum class Type { BinExp, IntegerExp } tag; // Holds information about the type of expression this is.
-	union {
-
-		SemanticInfo value;
-
-		struct {
-			char op;
-			struct AST_Node* left;
-			struct AST_Node* right;
-		} BinExp;
-
-		struct {
-			char op;
-			struct AST_Node* operand;
-		} UnExp;
-
-		struct {
-			const char* name;
-			struct AST_List* args;
-		} CallExp;
-
-	} operation;
+enum BinaryOpType {
+	Add,
+	Mul,
+	Sub,
+	OP_Count
 };
 
-typedef struct AST_List {
-	AST_Node* element;
+enum ExpressionType
+{
+	E_Integer,
+	E_BinOp,
+	E_UnOp,
+	E_Count
+};
+
+struct Expression {
+	ExpressionType expType;
+};
+
+typedef struct Integer : public Expression {
+	int value;
+} Integer;
+
+typedef struct BinOp : public Expression {
+	BinaryOpType opType;
+	Expression* left;
+	Expression* right;
+} BinOp;
+
+/*typedef struct AST_List {
+	struct AST_Node* element;
 	struct AST_List* next;
-};
+} AST_List ;*/
+
 
 // Literals
-AST_Node* IntegerExp(int i);
+Expression* IntegerExp(int i);
 
 // Binary Expressions
-
-AST_Node* BinaryExp(char op, AST_Node* left, AST_Node* right);
+Expression* BinaryExp(BinaryOpType op, Expression* left, Expression* right);
 
 #endif

@@ -250,7 +250,10 @@ int main(int argc, char** argv) {
     PrintDebug("Finished lexing file: %s\n", argv[1]);
     PrintDebug("Testing AST Interpretation:\n");
 
-    AST_Node* e = BinaryExp('+', BinaryExp('*', IntegerExp(2), IntegerExp(5)), IntegerExp(5));
+    //Expression* e = IntegerExp(3);
+    Expression* e = BinaryExp(Mul, IntegerExp(5), IntegerExp(3));
+
+    //PrintDebug("Value: %d\n", eval(e));
 
     PrintDebug("Expression [%s] evaluates to: %d\n", toString(e).c_str(), eval(e).v.i);
 

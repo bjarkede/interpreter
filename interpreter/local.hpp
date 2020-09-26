@@ -6,7 +6,7 @@
 #define L_INTEGER int64_t
 #define L_BOOL bool
 
-typedef enum BinOp {
+/*typedef enum BinOp {
 	// Arithmetic
 	OP_ADD, OP_SUB, OP_MUL,
 	// Comparison
@@ -15,7 +15,9 @@ typedef enum BinOp {
 	OP_AND, OP_OR,
 	// Others
 	OP_SEL, OP_MIN, OP_MAX
-} BinOp;
+} BinOp;*/
+
+
 
 typedef struct L_STRING {
 	u8 flags;

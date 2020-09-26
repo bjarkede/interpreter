@@ -2,6 +2,7 @@
 #define INTERPRETER_HPP
 
 #include "ast.hpp"
+#include "local.hpp"
 
 // @Nocheckin
 #include <string>
@@ -18,7 +19,7 @@ typedef struct Value {
 	} v;
 } Value;
 
-Value eval(AST_Node* Expr);
-std::string toString(AST_Node* Expr);
+Value eval(Expression* Expr);
+std::string toString(Expression* Expr);
 
 #endif

@@ -1,54 +1,56 @@
 #include "interpreter.hpp"
 
-Value eval(AST_Node* Expr) {
-	switch (Expr->tag) {
-	case AST_Node::Type::IntegerExp: 
-	{
-		Value result;
-		result.v.i = Expr->operation.value.i;
-		return result;
-	} break;
-	case AST_Node::Type::BinExp: 
-	{
-		Value result;
+Value eval(Expression* e) {
 	
-		Value lvalue = eval(Expr->operation.BinExp.left);
-		Value rvalue = eval(Expr->operation.BinExp.right);
+	Value v;
+	
+	switch (e->expType) {
+	case E_Integer:
+	{
+		v.v.i = ((Integer*)e)->value;
+		return v;
+	} break;
+	case E_BinOp:
+	{
 
-		switch (Expr->operation.BinExp.op) {
-		case '+': 
+		Value lvalue = eval(((BinOp*)e)->left);
+		Value rvalue = eval(((BinOp*)e)->right);
+
+		switch (((BinOp*)e)->opType) {
+		case Add:
 		{
-			result.v.i = lvalue.v.i + rvalue.v.i;
-			return result;
+			v.v.i = lvalue.v.i + rvalue.v.i;
+			return v;
 		} break;
-		case '-':
+		case Sub:
 		{
-			result.v.i = lvalue.v.i - rvalue.v.i;
-			return result;
+			v.v.i = lvalue.v.i - rvalue.v.i;
+			return v;
 		} break;
-		case '*':
+		case Mul:
 		{
-			result.v.i = lvalue.v.i * rvalue.v.i;
-			return result;
+			v.v.i = lvalue.v.i * rvalue.v.i;
+			return v;
 		} break;
 		}
 	} break;
 	}
-
 }
 
-std::string toString(AST_Node* Expr) {
+std::string toString(Expression* e) {
+
+	const char* operands[] = { "+", "*", "-" };
 
 	std::ostringstream buffer;
 
-	switch (Expr->tag) {
-	case AST_Node::Type::IntegerExp: 
+	switch (e->expType) {
+	case E_Integer: 
 	{
-		buffer << Expr->operation.value.i;
+		buffer << ((Integer*)e)->value;
 		return buffer.str();
 	} break;
-	case AST_Node::Type::BinExp: {
-		buffer << toString(Expr->operation.BinExp.left) << Expr->operation.BinExp.op << toString(Expr->operation.BinExp.right);
+	case E_BinOp: {
+		buffer << toString(((BinOp*)e)->left) << operands[((BinOp*)e)->opType] << toString(((BinOp*)e)->right);
 		return buffer.str();
 	} break;
 	}

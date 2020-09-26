@@ -1,20 +1,22 @@
 #include "ast.hpp"
 
-AST_Node* IntegerExp(int i) {
-	AST_Node* e = (AST_Node*)malloc(sizeof(AST_Node));
-	e->tag = AST_Node::Type::IntegerExp;
-	e->operation.value.i = i;
-	return e;
-}
+Expression* IntegerExp(int i) {
+	Integer* e = (Integer*)malloc(sizeof(Integer));
 
-AST_Node* BinaryExp(char op, AST_Node* left, AST_Node* right) {
-	AST_Node* e = (AST_Node*)malloc(sizeof(AST_Node));
-	
-	e->tag = AST_Node::Type::BinExp;
-
-	e->operation.BinExp.op = op;
-	e->operation.BinExp.left = left;
-	e->operation.BinExp.right = right;	
+	e->expType = E_Integer;
+	e->value = i;
 
 	return e;
 }
+
+Expression* BinaryExp(BinaryOpType op, Expression* left, Expression* right) {
+	BinOp* e = (BinOp*)malloc(sizeof(BinOp));
+
+	e->expType = E_BinOp;
+	e->opType = op;
+	e->left = left;
+	e->right = right;
+
+	return e;
+}
+

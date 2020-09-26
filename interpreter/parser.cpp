@@ -75,7 +75,7 @@ static void Expression(LexerState* ls) {
 }
 
 static void SubExpression(LexerState* ls, int limit) {
-	BinOp op;
+	//BinaryOpType op;
 	SimpleExpression(ls);
 }
 
