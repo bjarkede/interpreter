@@ -1,11 +1,13 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
+#include "local.hpp"
+
 #define next(ls) (ls->currentChar = *(++ls->z), ls->t.col++)
 #define save_and_next(ls) (SaveToken(ls, ls->currentChar),next(ls))
 #define reset_buffer(ls) (memset(ls->TBuffer.buffer, 0, ls->TBuffer.length), ls->TBuffer.writeIndex = 0)
 
-bool ProcessCharacterSequence(char* filePath, LexerState* ls);
+bool InitializeLexer(char* filePath, LexerState* ls);
 bool InitializeLexerState(LexerState* ls, int firstChar);
 
 int Lex(LexerState* ls, SemanticInfo* semInfo);
@@ -44,5 +46,7 @@ static const char* const tokenStrings[] = {
 	// Others
 	"EOZ"
 };
+
+RESERVED SingleCharToToken(int op);
 
 #endif

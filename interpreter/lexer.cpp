@@ -1,9 +1,6 @@
-#include "local.hpp"
 #include "lexer.hpp"
-#include "ast.hpp"
-#include "interpreter.hpp"
 
-static bool InitializeLexerState(LexerState* ls, int firstChar) {
+bool InitializeLexerState(LexerState* ls, int firstChar) {
     ls->t = {};
     ls->lookahead = {};
     
@@ -21,27 +18,10 @@ static bool InitializeLexerState(LexerState* ls, int firstChar) {
     return true;
 }
 
-static bool ProcessCharacterSequence(char* filePath, LexerState* ls) {
+bool InitializeLexer(char* filePath, LexerState* ls) {
     if (ReadEntireFile(ls->IOZ, filePath)) {
         if (InitializeLexerState(ls, ((char*)ls->IOZ.buffer)[0])) {
-            PrintDebug("Tokens:\n");
-            for (;;) {
-                ProcessNextToken(ls);
-
-                if (ls->t.token == TK_INT) {
-                    printf("Type: %d, Line: %d[%d ], Integer: [ %d ]\n", ls->t.token,
-                        ls->lineNumber,
-                        ls->t.col, ls->t.semInfo.i);
-                }
-                else {
-                    printf("Type: %d, Line: %d[%d ], Symbol: [ %s ]\n", ls->t.token,
-                        ls->lineNumber,
-                        ls->t.col,
-                        (ls->t.semInfo.s == NULL ? (char*)&ls->t.token : ls->t.semInfo.s->contents));
-                }
-       
-                if (ls->t.token == TK_EOZ) return true;
-            }
+            return true;
         }
     }
     else {
@@ -50,7 +30,7 @@ static bool ProcessCharacterSequence(char* filePath, LexerState* ls) {
     return true;    
 }
 
-static void ProcessNextToken(LexerState* ls) {
+void ProcessNextToken(LexerState* ls) {
     ls->lastLine = ls->lineNumber;
     if (ls->lookahead.token != TK_EOZ) {  // If there is a look-a-head token use that one.
         ls->t = ls->lookahead;
@@ -62,7 +42,7 @@ static void ProcessNextToken(LexerState* ls) {
     }
 }
 
-static int ProcessLookAHeadToken(LexerState* ls) {
+int ProcessLookAHeadToken(LexerState* ls) {
     assert(ls->lookahead.token == TK_EOZ);
     ls->lookahead.token = Lex(ls, &ls->lookahead.semInfo);
     return ls->lookahead.token;
@@ -91,13 +71,11 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
             return TK_EOZ;
         } break;
         case '+': {
-            save_and_next(ls);
-            if (!isdigit(ls->currentChar)) return  '+';
+            if (!isdigit(ls->currentChar)) { save_and_next(ls); return  TK_ADD;}
             return ReadNumeralLiteral(ls, semInfo);
         } break;
         case '-': { 
-            save_and_next(ls);
-            if (!isdigit(ls->currentChar)) return  '-';
+            if (!isdigit(ls->currentChar)) { save_and_next(ls); return  TK_SUB; }
             return ReadNumeralLiteral(ls, semInfo);
         } break;
         case '0': case '1': case '2': case '3': case '4':
@@ -130,9 +108,23 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
                 // Single-character tokens: (, +, -, ... 
                 int c = ls->currentChar;
                 next(ls);
-                return c;
+                return SingleCharToToken(c);
+                /*int c = ls->currentChar;
+                
+                return c;*/
             }
         }
+    }
+}
+
+static RESERVED SingleCharToToken(int op) {
+    switch (op) {
+    case '(': return TK_SEPL;
+    case ')': return TK_SEPR;
+    case '*': return TK_MUL;
+    case '/': return TK_DIV;
+    default:
+        FatalError("LexingError: Couldn't get single-character token %c", (char)op);
     }
 }
 
@@ -235,27 +227,4 @@ static void InclineLineNumber(LexerState* ls) {
         FatalError("Read too many lines in current chunk. Integer overflow.\n");
 
     ls->t.col = 0;
-}
-
-// @Debug:
-// We use this main to test the functions used in the lexer.
-int main(int argc, char** argv) {
-
-    LexerState* ls = (LexerState*)malloc(sizeof(LexerState));
-
-    if (!ProcessCharacterSequence(argv[1], ls)) {
-        FatalError("Couldn't process input stream: %s\n", argv[1]);
-    }
-
-    PrintDebug("Finished lexing file: %s\n", argv[1]);
-    PrintDebug("Testing AST Interpretation:\n");
-
-    //Expression* e = IntegerExp(3);
-    Expression* e = BinaryExp(Mul, IntegerExp(5), IntegerExp(3));
-
-    //PrintDebug("Value: %d\n", eval(e));
-
-    PrintDebug("Expression [%s] evaluates to: %d\n", toString(e).c_str(), eval(e).v.i);
-
-    return 1;
 }

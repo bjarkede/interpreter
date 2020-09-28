@@ -4,10 +4,18 @@
 #include "local.hpp"
 
 enum BinaryOpType {
-	Add,
-	Mul,
-	Sub,
-	OP_Count
+	// Arithmetic
+	Add, Sub, Mul, Mod, Pow,
+	Div, IDiv,
+	// Comparison
+	EQ, LT,
+	// Logical
+	AND, OR,
+	// Others
+	MIN, MAX,
+
+	OP_NOBINOPR,
+	OP_COUNT
 };
 
 enum ExpressionType
@@ -15,12 +23,13 @@ enum ExpressionType
 	E_Integer,
 	E_BinOp,
 	E_UnOp,
+	E_NoType,
 	E_Count
 };
 
-struct Expression {
+typedef struct Expression {
 	ExpressionType expType;
-};
+} Exp;
 
 typedef struct Integer : public Expression {
 	int value;
@@ -32,11 +41,8 @@ typedef struct BinOp : public Expression {
 	Expression* right;
 } BinOp;
 
-/*typedef struct AST_List {
-	struct AST_Node* element;
-	struct AST_List* next;
-} AST_List ;*/
-
+// Empty
+Expression* EmptyExp();
 
 // Literals
 Expression* IntegerExp(int i);

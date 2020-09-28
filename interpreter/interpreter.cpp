@@ -39,7 +39,7 @@ Value eval(Expression* e) {
 
 std::string toString(Expression* e) {
 
-	const char* operands[] = { "+", "*", "-" };
+	static const char* operands[] = { "+", "*", "-" };
 
 	std::ostringstream buffer;
 

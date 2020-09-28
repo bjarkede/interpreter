@@ -19,7 +19,15 @@ typedef struct Value {
 	} v;
 } Value;
 
+// Interpreting
 Value eval(Expression* Expr);
+
+// Lookup-functions
+// int lookup(const char* varName);
+// Value lookup(const char* varName);
+
+// Utility
 std::string toString(Expression* Expr);
+
 
 #endif

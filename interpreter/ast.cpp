@@ -1,5 +1,12 @@
 #include "ast.hpp"
 
+Expression* EmptyExp() {
+	Expression* e = (Expression*)malloc(sizeof(Expression));
+	e->expType = E_NoType;
+
+	return e;
+}
+
 Expression* IntegerExp(int i) {
 	Integer* e = (Integer*)malloc(sizeof(Integer));
 
