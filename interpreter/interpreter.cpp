@@ -32,6 +32,11 @@ Value eval(Expression* e) {
 			v.v.i = lvalue.v.i * rvalue.v.i;
 			return v;
 		} break;
+		case Div:
+		{
+			v.v.i = lvalue.v.i / rvalue.v.i;
+			return v;
+		}
 		}
 	} break;
 	}
@@ -39,7 +44,7 @@ Value eval(Expression* e) {
 
 std::string toString(Expression* e) {
 
-	static const char* operands[] = { "+", "*", "-" };
+	static const char* operands[] = { "+", "-", "*", "%", "^", "/" };
 
 	std::ostringstream buffer;
 

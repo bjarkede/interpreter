@@ -198,7 +198,6 @@ static void SimpleExpression(LexerState* ls) {
 }
 
 static Exp* ParseExpression(LexerState* ls) {
-	ProcessNextToken(ls);
 	return ParseExpressionTernary(ls);
 }
 
@@ -208,18 +207,19 @@ static bool IsUnaryOperator(LexerState* ls) {
 
 static Exp* ParseExpressionBase(LexerState* ls) {
 	Exp* expr = ParseExpressionOperand(ls);
-	/*while (test(ls, '(') || test(ls, '[') || test(ls, '.')) {
+	while (test(ls, '(') || test(ls, '[') || test(ls, '.')) {
 		if (check_next(ls, '(')) {
 			Exp** args = NULL;
 			if (!test(ls, ')')) {
-				// @TODO:
-				// Push ParseExpression(ls) to the args buffer
+				// @TODO: Push arguments to args and parse them.
+				// Do this while the next symbol is ','.
 			}
+			check_match(ls, ')', '(', ls->t.line);
 		}
 		else {
 
 		}
-	}*/
+	}
 	return expr;
 }
 
@@ -340,10 +340,12 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 }
 
 void Parse(LexerState* ls) {
-	Exp* e = ParseExpression(ls);
 
+	ProcessNextToken(ls);
+	Exp* expr = ParseExpression(ls);
 
-	PrintDebug("SyntaxMessage: Input accepted by parser.\n");
-	PrintDebug("Expression: [ %s ]\nValue: %d\n", toString(e).c_str(), eval(e).v);
+	PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
+	PrintDebug("Testing AST Interpretation:\n");
+	PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(expr).c_str(), eval(expr).v);
 }
 
