@@ -43,9 +43,9 @@ int main(int argc, char** argv) {
     PrintDebug("Finished lexing and parse validating file: %s\n", argv[1]);
     PrintDebug("Testing AST Interpretation:\n");
 
-    Exp* e = BinaryExp(Sub, BinaryExp(Mul, IntegerExp(5), IntegerExp(3)), IntegerExp(5));
+    //Exp* e = BinaryExp(Sub, BinaryExp(Mul, IntegerExp(5), IntegerExp(3)), IntegerExp(5));
 
-    PrintDebug("Expression [ %s ] evaluates to: %d\n", toString(e).c_str(), eval(e).v.i);
+    //PrintDebug("Expression [ %s ] evaluates to: %d\n", toString(e).c_str(), eval(e).v.i);
 
     return 1;
 }

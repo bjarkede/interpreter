@@ -2,7 +2,6 @@
 #define LOCAL_HPP
 
 #include "shared.hpp"
-#include "ast.hpp"
 
 #define L_INTEGER int64_t
 #define L_BOOL bool

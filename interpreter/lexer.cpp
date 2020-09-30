@@ -71,11 +71,11 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
             return TK_EOZ;
         } break;
         case '+': {
-            if (!isdigit(ls->currentChar)) { save_and_next(ls); return  TK_ADD;}
+            if (!isdigit(ls->currentChar)) { save_and_next(ls); return  '+';}
             return ReadNumeralLiteral(ls, semInfo);
         } break;
         case '-': { 
-            if (!isdigit(ls->currentChar)) { save_and_next(ls); return  TK_SUB; }
+            if (!isdigit(ls->currentChar)) { save_and_next(ls); return  '-'; }
             return ReadNumeralLiteral(ls, semInfo);
         } break;
         case '0': case '1': case '2': case '3': case '4':
@@ -107,11 +107,8 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
             else {
                 // Single-character tokens: (, +, -, ... 
                 int c = ls->currentChar;
-                next(ls);
-                return SingleCharToToken(c);
-                /*int c = ls->currentChar;
-                
-                return c;*/
+                next(ls);                
+                return c;
             }
         }
     }

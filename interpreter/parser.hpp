@@ -8,16 +8,8 @@
 #define MAXSIZE 100
 
 #include <stack>
+#include <list>
 #include <map>
-
-typedef enum NonTerminal {
-	NT_EXP,
-	NT_EXP_,
-	NT_EXP2,
-	NT_EXP2_,
-	NT_EXP3,
-	NT_COUNT
-} NTerm;
 
 // Table-driven LL(1) parsing using stack automata
 void LL1(LexerState* ls);
@@ -30,12 +22,22 @@ void SecondaryExpression(LexerState* ls);
 void SuffixedSecondaryExpression(LexerState* ls);
 void SimpleExpression(LexerState* ls);
 
-Exp* TerminalNode(RESERVED terminal);
-Exp* NonTerminalNode(RESERVED nonterminal, Exp* subtrees);
+// Test Parsing
+Exp* ParseExpression(LexerState* ls);
+Exp* ParseExpressionTernary(LexerState* ls);
+Exp* ParseParenthesisedExpression(LexerState* ls);
+Exp* ParseExpressionOr(LexerState* ls);
+Exp* ParseExpressionOperand(LexerState* ls);
+Exp* ParseExpressionAnd(LexerState* ls);
+Exp* ParseExpressionCompare(LexerState* ls);
+Exp* ParseExpressionAdd(LexerState* ls);
+Exp* ParseExpressionMul(LexerState* ls);
+Exp* ParseExpressionUnary(LexerState* ls);
+Exp* ParseExpressionBase(LexerState* ls);
 
 // Helpers for Table-driven LL(1)
-Exp* makeNodes(Exp* e, int* arr);
-int* rightHandSide(int tableIndex);
+std::list<Exp*> makeNodes(std::list<int> ListOfGrammars);
+std::list<int> rightHandSide(int tableIndex);
 
 // Helpers in general.
 void check_match(LexerState* ls, int what, int who, int where);
@@ -43,5 +45,12 @@ bool test_next(LexerState* ls, int c);
 
 void pushrule(const char* s);
 void poprule(void);
+
+BinaryOpType GetBinaryOperator(int op);
+UnOpType GetUnaryOperator(int op);
+bool IsCompOperator(LexerState* ls);
+bool IsAddOperator(LexerState* ls);
+bool IsMulOperator(LexerState* ls);
+bool IsUnaryOperator(LexerState* ls);
 
 #endif

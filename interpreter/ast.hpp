@@ -10,17 +10,26 @@ enum BinaryOpType {
 	// Comparison
 	EQ, LT,
 	// Logical
-	AND, OR,
+	And, Or,
 	// Others
 	MIN, MAX,
 
-	OP_NOBINOPR,
+	NoBinOp,
 	OP_COUNT
+};
+
+enum UnOpType {
+	Not,
+	Minus,
+	BNot,
+	Len,
+	NoUnOp
 };
 
 enum ExpressionType
 {
 	E_Integer,
+	E_String,
 	E_BinOp,
 	E_UnOp,
 	E_NoType,
@@ -32,8 +41,12 @@ typedef struct Expression {
 } Exp;
 
 typedef struct Integer : public Expression {
-	int value;
+	unsigned long long value;
 } Integer;
+
+typedef struct String : public Expression {
+	const char* value;
+} String;
 
 typedef struct BinOp : public Expression {
 	BinaryOpType opType;
@@ -41,13 +54,22 @@ typedef struct BinOp : public Expression {
 	Expression* right;
 } BinOp;
 
+typedef struct UnOp : public Expression {
+	UnOpType opType;
+	Expression* expr;
+} UnOp;
+
 // Empty
 Expression* EmptyExp();
 
 // Literals
-Expression* IntegerExp(int i);
+Expression* IntegerExp(L_INTEGER i);
+Expression* StringExp(L_STRING* val);
 
 // Binary Expressions
 Expression* BinaryExp(BinaryOpType op, Expression* left, Expression* right);
+
+// Unary
+Expression* UnaryExp(UnOpType op, Expression* expr);
 
 #endif

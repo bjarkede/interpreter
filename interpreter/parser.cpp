@@ -1,4 +1,6 @@
 #include "parser.hpp"
+#include "interpreter.hpp"
+#include "ast.hpp"
 
 // Recursive Descent Parsing
 // Each nonterminal in the grammer is implemented by a function in the program.
@@ -40,24 +42,21 @@
 	Exp3 -> num
 	Exp3 -> ( Exp )
 
-
    ----------- */
-
-static const char* parseList[MAXSIZE];
-static int parseIndex;
-
-static void pushrule(const char* s) {
-	parseList[parseIndex++] = s;
-}
-
-static void poprule(void) {
-	--parseIndex;
-}
 
 static bool test_next(LexerState* ls, int c) {
 	if (ls->t.token == c) {
 		//next(ls);
 		ProcessNextToken(ls);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+static bool test(LexerState* ls, int c) {
+	if (ls->t.token == c) {
 		return true;
 	}
 	else {
@@ -76,127 +75,77 @@ static void check_match(LexerState* ls, int what, int who, int where) {
 	}
 }
 
+static bool check(LexerState* ls, int c) {
+	if (ls->t.token != c)
+		return false;
+	return true;
+}
+
+static bool check_next(LexerState* ls, int c) {
+	bool r = check(ls, c);
+	ProcessNextToken(ls);
+	return r;
+}
+
 void LL1(LexerState* ls) {
-
-	parseIndex = 0;
-
-	int table[NT_COUNT][TK_COUNT];
+	int table[E_Count][TK_COUNT];
 	memset(table, -1, sizeof(table));
 
-	table[NT_EXP][TK_INT] = 0;
-	table[NT_EXP][TK_SEPL] = 0;
+	//table[E_Hole][TK_INT] = 0;
 
-	table[NT_EXP_][TK_ADD] = 1;
-	table[NT_EXP_][TK_SUB] = 2;
-	table[NT_EXP_][TK_SEPR] = 3;
-	table[NT_EXP_][TK_EOZ] = 3;
+	table[E_BinOp][TK_ADD] = 1;
+	table[E_BinOp][TK_SUB] = 2;
+	table[E_BinOp][TK_EOZ] = 3;
 
-	table[NT_EXP2][TK_INT] = 4;
-	table[NT_EXP2][TK_SEPL] = 4;
-
-	table[NT_EXP2_][TK_ADD] = 7;
-	table[NT_EXP2_][TK_SUB] = 7;
-	table[NT_EXP2_][TK_MUL] = 5;
-	table[NT_EXP2_][TK_SUB] = 6;
-	table[NT_EXP2_][TK_SEPR] = 7;
-	table[NT_EXP2_][TK_EOZ] = 7;
-
-	table[NT_EXP3][TK_INT] = 8;
-	table[NT_EXP3][TK_SEPL] = 9;
-
-	std::stack<int> stack;
-
-	stack.push(TK_EOZ);
-	stack.push(NT_EXP);
+	std::stack<Exp*> expStack;
 	
 	ProcessNextToken(ls);
 
-	/*while (!stack.empty()) {
-		int t = stack.top();
-		if (t == TK_ADD || t == TK_SUB || t == TK_MUL || t == TK_DIV || t == TK_INT || t == TK_SEPL || t == TK_SEPR || t == TK_EOZ) {
-			PrintDebug("ParserAlert: Match found! Type: %d\n", ls->t.token);
-			stack.pop();
+	while (!expStack.empty()) {
+		Exp* top = expStack.top();
+		if (top->expType == E_Integer || top->expType == E_BinOp) {
+			expStack.pop();
+
+			switch (top->expType) {
+			case E_Integer:
+				{
+				
+				} break;
+			case E_BinOp: 
+				{
+					
+				} break;
+			}
+
 			ProcessNextToken(ls);
 		}
-		else if (table[t][ls->t.token] == -1) {
+		else if (table[top->expType][ls->t.token] == -1) {
 			FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 		}
 		else {
-			switch (table[t][ls->t.token]) {
-			case 0:
-			{
-				stack.pop();
-				stack.push(NT_EXP_);
-				stack.push(NT_EXP2);
-			} break;
-			case 1:
-			{
-				stack.pop();
-				stack.push(NT_EXP_);
-				stack.push(NT_EXP2);
-				stack.push(TK_ADD);
-			} break;
-			case 2:
-			{
-				stack.pop();
-				stack.push(NT_EXP_);
-				stack.push(NT_EXP2);
-				stack.push(TK_SUB);
-			} break;
-			case 3:
-			{
-				stack.pop();
-			} break;
-			case 4:
-			{
-				stack.pop();
-				stack.push(NT_EXP2_);
-				stack.push(NT_EXP3);
-			} break;
-			case 5:
-			{
-				stack.pop();
-				stack.push(NT_EXP2_);
-				stack.push(NT_EXP3);
-				stack.push(TK_MUL);
-			} break;
-			case 6:
-			{
-				stack.pop();
-				stack.push(NT_EXP2_);
-				stack.push(NT_EXP3);
-				stack.push(TK_DIV);
-			} break;
-			case 7:
-			{
-				stack.pop();
-			} break;
-			case 8:
-			{
-				stack.pop();
-				stack.push(TK_INT);
-			} break;
-			case 9:
-			{
-				stack.pop();
-				stack.push(TK_SEPL);
-				stack.push(NT_EXP);
-				stack.push(TK_SEPR);
-			} break;
+			Exp* nonTerminal = top; expStack.pop();
+			
+			switch (table[top->expType][ls->t.token]) {
+			case 0: {} break;
+			case 1: {} break;
+			case 2: {} break;
+			case 3: { expStack.pop(); } break; // return a hole that needs to be filled by the first int?
 			}
+
 		}
 	}
-	*/
+
+	//PrintDebug("LL(1) Table-driven evaluation of output expression[ %s ]: %d.\n", toString(e).c_str(), eval(e).v.i);
 }
 
 static void PrimaryExpression(LexerState* ls) {
+
 	if (ls->t.token == TK_INT || ls->t.token == TK_SEPL) {
 		SecondaryExpression(ls);
 		SuffixedExpression(ls);
 	} else 
 		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 }
-
 static void SecondaryExpression(LexerState* ls) {
 	if (ls->t.token == TK_INT || ls->t.token == TK_SEPL) {
 		SimpleExpression(ls);
@@ -204,7 +153,6 @@ static void SecondaryExpression(LexerState* ls) {
 	} else
 		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 }	
-
 static void SuffixedExpression(LexerState* ls) {
 	if (ls->t.token == TK_ADD) {
 		check_match(ls, TK_ADD, '+', ls->t.line);
@@ -218,9 +166,9 @@ static void SuffixedExpression(LexerState* ls) {
 	}
 	else if(ls->t.token == TK_SEPR || ls->t.token == TK_EOZ) {
 
-	}
+	} else
+		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 }
-
 static void SuffixedSecondaryExpression(LexerState* ls) {
 	if (ls->t.token == TK_ADD || ls->t.token == TK_SUB ||
 		ls->t.token == TK_SEPR || ls->t.token == TK_EOZ) {
@@ -237,10 +185,8 @@ static void SuffixedSecondaryExpression(LexerState* ls) {
 	} else
 		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 }
-
 static void SimpleExpression(LexerState* ls) {
 	if (ls->t.token == TK_INT) {
-		//PrintDebug("Found literal %d\n", ls->t.semInfo.i);
 		check_match(ls, TK_INT, 'n', ls->t.line);
 	}
 	else if (ls->t.token == TK_SEPL) {
@@ -251,30 +197,153 @@ static void SimpleExpression(LexerState* ls) {
 		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 }
 
-static Exp* TerminalNode(RESERVED terminal) {
-	switch (terminal) {
-	case TK_INT: { return IntegerExp(0); } break;
-	default:
-		FatalError("SyntaxError: Failed when generating terminal expression.");
+static Exp* ParseExpression(LexerState* ls) {
+	ProcessNextToken(ls);
+	return ParseExpressionTernary(ls);
+}
+
+static bool IsUnaryOperator(LexerState* ls) {
+	return test(ls, '+') || test(ls, '-') || test(ls, '*') || test(ls, '&');
+}
+
+static Exp* ParseExpressionBase(LexerState* ls) {
+	Exp* expr = ParseExpressionOperand(ls);
+	/*while (test(ls, '(') || test(ls, '[') || test(ls, '.')) {
+		if (check_next(ls, '(')) {
+			Exp** args = NULL;
+			if (!test(ls, ')')) {
+				// @TODO:
+				// Push ParseExpression(ls) to the args buffer
+			}
+		}
+		else {
+
+		}
+	}*/
+	return expr;
+}
+
+static Exp* ParseExpressionUnary(LexerState* ls) {
+	if (IsUnaryOperator(ls)) {
+		UnOpType op = GetUnaryOperator(ls->t.token);
+		ProcessNextToken(ls);
+		return UnaryExp(op, ParseExpressionUnary(ls));
+	}
+	else {
+		return ParseExpressionBase(ls);
 	}
 }
 
-// Takes a non-terminal symbol and a list of sub-trees that it uses to build
-// the non-terminal node. 
-static Exp* NonTerminalNode(RESERVED nonterminal, Exp** subtree) {
-	switch (nonterminal) {
-	case TK_ADD: 
-	{
-		return BinaryExp(Add, subtree[0], subtree[1]);
-	} break;
+static bool IsMulOperator(LexerState* ls) {
+	return test(ls, '*') || test(ls, '/') || test(ls, '%') || test(ls, '&');
+}
+
+static Exp* ParseExpressionMul(LexerState* ls) {
+	Exp* expr = ParseExpressionUnary(ls);
+	while (IsMulOperator(ls)) {
+		BinaryOpType op = GetBinaryOperator(ls->t.token);
+		ProcessNextToken(ls);
+		expr = BinaryExp(op, expr, ParseExpressionUnary(ls));
+	}
+
+	return expr;
+}
+
+static bool IsAddOperator(LexerState* ls) {
+	return test(ls, '+') || test(ls, '-') || test(ls, '|') || test(ls, '^');
+}
+
+static Exp* ParseExpressionAdd(LexerState* ls) {
+	Exp* expr = ParseExpressionMul(ls);
+	while (IsAddOperator(ls)) {
+		BinaryOpType op = GetBinaryOperator(ls->t.token);
+		ProcessNextToken(ls);
+		expr = BinaryExp(op, expr, ParseExpressionMul(ls));
+	}
+	return expr;
+}
+
+static bool IsCompOperator(LexerState* ls) {
+	return test(ls, '<') || test(ls, '>') || test(ls, TK_EQ) || test(ls, TK_LE);
+}
+
+static Exp* ParseExpressionCompare(LexerState* ls) {
+	Exp* expr = ParseExpressionAdd(ls);
+	while (IsCompOperator(ls)) {
+		BinaryOpType op = GetBinaryOperator(ls->t.token);
+		ProcessNextToken(ls);
+		return BinaryExp(op, expr, ParseExpressionAdd(ls));
+	}
+	return expr;
+}
+
+static Exp* ParseExpressionAnd(LexerState* ls) {
+	Exp* expr = ParseExpressionCompare(ls);
+	while (check_next(ls, TK_AND)) {
+		expr = BinaryExp(And, expr, ParseExpressionCompare(ls));
+	}
+	return expr;
+}
+
+static Exp* ParseExpressionOr(LexerState* ls) {
+	Exp* expr = ParseExpressionAnd(ls);
+	while (check_next(ls, TK_OR)) {
+		expr = BinaryExp(Or, expr, ParseExpressionAnd(ls));
+	}
+	return expr;
+}
+
+static Exp* ParseExpressionTernary(LexerState* ls) {
+	Exp* expr = ParseExpressionOr(ls);
+	
+	// @TODO:
+
+	return expr;
+}
+
+static Exp* ParseParenthesisedExpression(LexerState* ls) {
+	check(ls, '(');
+	Exp* expr = ParseExpression(ls);
+	check(ls, ')');
+	return expr;
+}
+
+static UnOpType GetUnaryOperator(int op) {
+	switch (op) {
+	case '!': return Not;
+	case '-': return Minus;
+	case '~': return BNot;
+	case '#': return Len;
 	default:
-		FatalError("SyntaxError: Failed when generating non-terminal expression");
+		return NoUnOp;
+	}
+}
+
+static BinaryOpType GetBinaryOperator(int op) {
+	switch (op) {
+	case '+': return Add;
+	case '-': return Sub;
+	case '*': return Mul;
+	case '%': return Mod;
+	case '^': return Pow;
+	case '/': return Div;
+	default:
+		return NoBinOp;
+	}
+}
+
+Exp* ParseExpressionOperand(LexerState*ls) {
+	switch (ls->t.token) {
+	case TK_INT: { unsigned long long val = ls->t.semInfo.i; ProcessNextToken(ls); return IntegerExp(val); } break;
+	case TK_VAR: { L_STRING* val = ls->t.semInfo.s; ProcessNextToken(ls); return StringExp(val); } break;
 	}
 }
 
 void Parse(LexerState* ls) {
-	ProcessNextToken(ls);
-	PrimaryExpression(ls);
+	Exp* e = ParseExpression(ls);
+
+
 	PrintDebug("SyntaxMessage: Input accepted by parser.\n");
+	PrintDebug("Expression: [ %s ]\nValue: %d\n", toString(e).c_str(), eval(e).v);
 }
 
