@@ -32,6 +32,7 @@ bool InitializeLexer(char* filePath, LexerState* ls) {
 
 void ProcessNextToken(LexerState* ls) {
     ls->lastLine = ls->lineNumber;
+    ls->lastCol = ls->t.col;
     if (ls->lookahead.token != TK_EOZ) {  // If there is a look-a-head token use that one.
         ls->t = ls->lookahead;
         ls->lookahead.token = TK_EOZ;
@@ -88,7 +89,7 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
 
                 do {
                     save_and_next(ls);
-                } while (isalnum(ls->currentChar));
+                } while (isalnum(ls->currentChar) || ls->currentChar == '_' || isdigit(ls->currentChar));
 
                 SaveToken(ls, '\0');
 

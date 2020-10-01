@@ -30,8 +30,11 @@ enum ExpressionType
 {
 	E_Integer,
 	E_String,
+	E_Variable,
+	E_LetBinding,
 	E_BinOp,
 	E_UnOp,
+	E_Paren,
 	E_NoType,
 	E_Count
 };
@@ -44,9 +47,9 @@ typedef struct Integer : public Expression {
 	unsigned long long value;
 } Integer;
 
-typedef struct String : public Expression {
-	const char* value;
-} String;
+typedef struct Variable : public Expression {
+	const char* name;
+} Var;
 
 typedef struct BinOp : public Expression {
 	BinaryOpType opType;
@@ -59,17 +62,32 @@ typedef struct UnOp : public Expression {
 	Expression* expr;
 } UnOp;
 
+typedef struct Paren : public Expression {
+	Expression* expr;
+} Paren;
+
+typedef struct Let : public Expression {
+	Expression* variable;
+	Expression* binding;
+	Expression* expr;
+} Let;
+
 // Empty
 Expression* EmptyExp();
 
 // Literals
 Expression* IntegerExp(L_INTEGER i);
-Expression* StringExp(L_STRING* val);
+Expression* VariableExp(L_STRING* val);
+Expression* ParenExp(Expression* expr);
 
 // Binary Expressions
 Expression* BinaryExp(BinaryOpType op, Expression* left, Expression* right);
 
 // Unary
 Expression* UnaryExp(UnOpType op, Expression* expr);
+
+// Let-bindings
+Expression* LetExp(Expression* var, Expression* binding, Expression* expr);
+
 
 #endif

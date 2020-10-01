@@ -49,6 +49,7 @@ typedef struct LexerState {
 	u8 currentChar; // Current charint
 	int lineNumber;  // Current linenumber (gets incremented when /n/r)
 	int lastLine;    // Line of the last consumed token.
+	int lastCol; // Column of last consumed token.
 
 	Token t;
 	Token lookahead;

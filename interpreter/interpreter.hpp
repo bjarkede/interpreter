@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <map>
 
 typedef struct Value {
 	enum class type { Integer, String, Bool };
@@ -25,6 +26,7 @@ Value eval(Expression* Expr);
 // Lookup-functions
 // int lookup(const char* varName);
 // Value lookup(const char* varName);
+Value lookup(const char* name);
 
 // Utility
 std::string toString(Expression* Expr);

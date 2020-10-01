@@ -46,7 +46,6 @@
 
 static bool test_next(LexerState* ls, int c) {
 	if (ls->t.token == c) {
-		//next(ls);
 		ProcessNextToken(ls);
 		return true;
 	}
@@ -82,9 +81,11 @@ static bool check(LexerState* ls, int c) {
 }
 
 static bool check_next(LexerState* ls, int c) {
-	bool r = check(ls, c);
-	ProcessNextToken(ls);
-	return r;
+	if (check(ls, c)) {
+		ProcessNextToken(ls);
+		return true;
+	}
+	return false;
 }
 
 void LL1(LexerState* ls) {
@@ -335,7 +336,28 @@ static BinaryOpType GetBinaryOperator(int op) {
 Exp* ParseExpressionOperand(LexerState*ls) {
 	switch (ls->t.token) {
 	case TK_INT: { unsigned long long val = ls->t.semInfo.i; ProcessNextToken(ls); return IntegerExp(val); } break;
-	case TK_VAR: { L_STRING* val = ls->t.semInfo.s; ProcessNextToken(ls); return StringExp(val); } break;
+	case TK_VAR: { L_STRING* val = ls->t.semInfo.s; ProcessNextToken(ls); return VariableExp(val); } break;
+	case '(': {
+		check_match(ls, '(', '(', ls->t.line);
+		Exp* expr = ParseExpression(ls);
+		check_match(ls, ')', ')', ls->t.line);
+		return ParenExp(expr);
+	} break;
+	case TK_LET: {
+		// Expr -> let VAR = Expr in Expr end 
+		check_match(ls, TK_LET, TK_LET, ls->t.line);
+		Exp* var = ParseExpression(ls);
+		if(var->expType != E_Variable) 
+			FatalError("SyntaxError: Expected variable but got [ %s ], Line: %d[%d ].", toString(var).c_str(), ls->lastLine, ls->lastCol);
+		check_match(ls, '=', '=', ls->t.line);
+		Exp* binding = ParseExpression(ls);
+		check_match(ls, TK_IN, TK_IN, ls->t.line);
+		Exp* expr = ParseExpression(ls);
+		check_match(ls, TK_END, TK_END, ls->t.line);
+		return LetExp(var, binding, expr);
+	} break;
+	default:
+		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 	}
 }
 

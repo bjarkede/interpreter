@@ -7,10 +7,21 @@ Expression* EmptyExp() {
 	return e;
 }
 
-Expression* StringExp(L_STRING* val) {
-	String* e = (String*)malloc(sizeof(String));
-	e->expType = E_String;
-	e->value = val->contents;
+Expression* VariableExp(L_STRING* val) {
+	Var* e = (Var*)malloc(sizeof(Var));
+	e->expType = E_Variable;
+	e->name = val->contents;
+
+	return e;
+}
+
+Expression* LetExp(Expression* var, Expression* binding, Expression* expr) {
+	Let* e = (Let*)malloc(sizeof(Let));
+
+	e->expType = E_LetBinding;
+	e->variable = var;
+	e->expr = expr;
+	e->binding = binding;
 
 	return e;
 }
@@ -20,6 +31,14 @@ Expression* IntegerExp(L_INTEGER i) {
 
 	e->expType = E_Integer;
 	e->value = i;
+
+	return e;
+}
+
+Expression* ParenExp(Expression* expr) {
+	Paren* e = (Paren*)malloc(sizeof(Paren));
+	e->expType = E_Paren;
+	e->expr = expr;
 
 	return e;
 }
