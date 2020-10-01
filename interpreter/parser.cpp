@@ -1,5 +1,4 @@
 #include "parser.hpp"
-#include "interpreter.hpp"
 #include "ast.hpp"
 
 // Recursive Descent Parsing
@@ -198,7 +197,7 @@ static void SimpleExpression(LexerState* ls) {
 		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 }
 
-static Exp* ParseExpression(LexerState* ls) {
+Exp* ParseExpression(LexerState* ls) {
 	return ParseExpressionTernary(ls);
 }
 
@@ -347,12 +346,15 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 		// Expr -> let VAR = Expr in Expr end 
 		check_match(ls, TK_LET, TK_LET, ls->t.line);
 		Exp* var = ParseExpression(ls);
-		if(var->expType != E_Variable) 
-			FatalError("SyntaxError: Expected variable but got [ %s ], Line: %d[%d ].", toString(var).c_str(), ls->lastLine, ls->lastCol);
+		if (var->expType != E_Variable)
+			FatalError("SyntaxError: Expected variable. Line: %d[%d ].", ls->lastLine, ls->lastCol);
 		check_match(ls, '=', '=', ls->t.line);
 		Exp* binding = ParseExpression(ls);
-		check_match(ls, TK_IN, TK_IN, ls->t.line);
-		Exp* expr = ParseExpression(ls);
+		Exp* expr = EmptyExp();
+		if (check(ls, TK_IN)) {
+			check_match(ls, TK_IN, TK_IN, ls->t.line);
+			expr = ParseExpression(ls);
+		}
 		check_match(ls, TK_END, TK_END, ls->t.line);
 		return LetExp(var, binding, expr);
 	} break;
@@ -362,12 +364,22 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 }
 
 void Parse(LexerState* ls) {
-
+	/*
+	std::vector<Expression*> expList;
+	// @TODO:
+	// Parse multiple expressions.
 	ProcessNextToken(ls);
-	Exp* expr = ParseExpression(ls);
+	while (ls->t.token != TK_EOZ) {
+		expList.push_back(ParseExpression(ls));
+	}
 
 	PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
 	PrintDebug("Testing AST Interpretation:\n");
-	PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(expr).c_str(), eval(expr).v);
+
+	for (auto& e : expList) {
+		PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(e).c_str(), eval(e).v);
+	}
+	*/
+	
 }
 

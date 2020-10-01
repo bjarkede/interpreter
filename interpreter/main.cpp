@@ -1,5 +1,3 @@
-#include "ast.hpp"
-
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "interpreter.hpp"
@@ -14,9 +12,21 @@ int main(int argc, char** argv) {
         FatalError("Couldn't process input stream: %s\n", argv[1]);
     }
 
-    Parse(ls);
+	std::vector<Expression*> expList;
+    
+	ProcessNextToken(ls);
+	while (ls->t.token != TK_EOZ) {
+		expList.push_back(ParseExpression(ls));
+	}
 
-    PrintDebug("Finished lexing, parsing and interpretingvalidating file: %s\n", argv[1]);
+	PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
+	PrintDebug("Testing AST Interpretation:\n");
+
+	for (auto& e : expList) {
+		PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(e).c_str(), eval(e).v);
+	}
+
+    PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
 
     return 1;
 }

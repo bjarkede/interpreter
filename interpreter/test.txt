@@ -1,1 +1,2 @@
-let x23_ = 1*2 in x23_ + 2 end
+let x2_ = 2 end
+let win = 5 in win * x2_ end

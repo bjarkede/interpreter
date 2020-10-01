@@ -7,7 +7,7 @@ struct cmp_str
 		return std::strcmp(a, b) < 0;
 	}
 };
-
+ 
 static std::map<const char*, Value, cmp_str> valueenv;
 
 Value lookup(const char* name) {
@@ -36,8 +36,14 @@ Value eval(Expression* e) {
 	case E_LetBinding: {
 		Value xval = eval(((Let*)e)->binding);
 		valueenv.insert(std::pair<const char*, Value>(((Var*)((Let*)e)->variable)->name, xval));
+		
+		if (((Let*)e)->expr->expType != E_NoType) {
+			v = eval(((Let*)e)->expr);
+		}
+		else {
+			v = xval;
+		}
 
-		v = eval(((Let*)e)->expr);
 		return v;
 	} break;
 	case E_BinOp:
@@ -97,7 +103,12 @@ std::string toString(Expression* e) {
 		buffer << "(" << toString(((Paren*)e)->expr) << ")";
 	} break;
 	case E_LetBinding: {
-		buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " in " << toString(((Let*)e)->expr) << " end";
+		if (((Let*)e)->expr->expType != E_NoType) {
+			buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " in " << toString(((Let*)e)->expr) << " end";
+		}
+		else {
+			buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " end";
+		}
 	} break;
 	}
 
