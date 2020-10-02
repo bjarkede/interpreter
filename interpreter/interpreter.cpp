@@ -1,4 +1,8 @@
 #include "interpreter.hpp"
+#include "symtable.hpp"
+
+// @TODO:
+// symbol tabels, a bunch of expressions. etc.
 
 struct cmp_str
 {
@@ -8,14 +12,11 @@ struct cmp_str
 	}
 };
  
-static std::map<const char*, Value, cmp_str> valueenv;
+//static std::map<const char*, Value, cmp_str> valueenv;
+static symtable<Value> valueenv;
 
 Value lookup(const char* name) {
-	auto it = valueenv.find(name);
-	if (it != valueenv.end())
-		return it->second;
-
-	FatalError("InterpretationError: Couldn't find variable [%s] in value environment.", name);
+	return valueenv.lookup(name);
 }
 
 Value eval(Expression* e) {
@@ -35,15 +36,8 @@ Value eval(Expression* e) {
 	} break;
 	case E_LetBinding: {
 		Value xval = eval(((Let*)e)->binding);
-		valueenv.insert(std::pair<const char*, Value>(((Var*)((Let*)e)->variable)->name, xval));
-		
-		if (((Let*)e)->expr->expType != E_NoType) {
-			v = eval(((Let*)e)->expr);
-		}
-		else {
-			v = xval;
-		}
-
+		valueenv.bind(xval, ((Var*)((Let*)e)->variable)->name);
+		v = eval(((Let*)e)->expr);
 		return v;
 	} break;
 	case E_BinOp:
@@ -103,12 +97,7 @@ std::string toString(Expression* e) {
 		buffer << "(" << toString(((Paren*)e)->expr) << ")";
 	} break;
 	case E_LetBinding: {
-		if (((Let*)e)->expr->expType != E_NoType) {
-			buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " in " << toString(((Let*)e)->expr) << " end";
-		}
-		else {
-			buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " end";
-		}
+		buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " in " << toString(((Let*)e)->expr) << " end";
 	} break;
 	}
 

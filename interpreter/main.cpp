@@ -1,6 +1,7 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "interpreter.hpp"
+#include "symtable.hpp"
 
 // @Debug:
 // We use this main to test the functions used in the lexer.
@@ -27,6 +28,14 @@ int main(int argc, char** argv) {
 	}
 
     PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
+
+	symtable<Value> sTable;
+	Value v;
+	v.v.i = 10;
+	sTable.bind(v, "xyz");
+	auto x = sTable.lookup("xyz");
+
+
 
     return 1;
 }

@@ -11,7 +11,7 @@
 #include <map>
 
 typedef struct Value {
-	enum class type { Integer, String, Bool };
+	enum { Integer, String, Bool } type;
 	union
 	{
 		L_INTEGER i;

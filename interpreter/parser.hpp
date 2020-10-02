@@ -11,17 +11,6 @@
 #include <list>
 #include <map>
 
-// Table-driven LL(1) parsing using stack automata
-void LL1(LexerState* ls);
-
-// LL(1) Recursive-descent parsing
-void Parse(LexerState* ls);
-void PrimaryExpression(LexerState* ls);
-void SuffixedExpression(LexerState* ls);
-void SecondaryExpression(LexerState* ls);
-void SuffixedSecondaryExpression(LexerState* ls);
-void SimpleExpression(LexerState* ls);
-
 // Test Parsing
 Exp* ParseExpression(LexerState* ls);
 Exp* ParseExpressionTernary(LexerState* ls);
@@ -35,16 +24,12 @@ Exp* ParseExpressionMul(LexerState* ls);
 Exp* ParseExpressionUnary(LexerState* ls);
 Exp* ParseExpressionBase(LexerState* ls);
 
-// Helpers for Table-driven LL(1)
-std::list<Exp*> makeNodes(std::list<int> ListOfGrammars);
-std::list<int> rightHandSide(int tableIndex);
-
 // Helpers in general.
 void check_match(LexerState* ls, int what, int who, int where);
 bool test_next(LexerState* ls, int c);
-
-void pushrule(const char* s);
-void poprule(void);
+bool test(LexerState* ls, int c);
+bool check(LexerState* ls, int c);
+bool check_next(LexerState* ls, int c);
 
 BinaryOpType GetBinaryOperator(int op);
 UnOpType GetUnaryOperator(int op);

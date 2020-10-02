@@ -1,48 +1,6 @@
 #include "parser.hpp"
 #include "ast.hpp"
 
-// Recursive Descent Parsing
-// Each nonterminal in the grammer is implemented by a function in the program.
-// Each such function looks at the next input symbol in order to choose one of the prductions for the nonterminal.
-
-/* -----------
-	Terminal symbols:
-
-	Identifiers such as x, Integer constatns like 12, string constants "foo", special symbols(x and *) etc,
-	and keywords like let, in, end...
-
-	Non-terminal symbols A, denoting the abstract syntax classes
-	
-	Example of grammer:
-
-	Expr -> Expr - Expr
-	Expr -> Expr * Expr
-	Expr -> Expr + Expr
-	Expr -> VAR
-	Expr -> INT
-	Expr -> -INT
-	Expr -> ( Expr )
-	Expr -> let VAR = Expr in Expr end 
-
-	A well-formed expression is followed by end-of-file
-
-	Main -> Expr EOF
-
-	Our interpreter grammer:
-	@Note: Primitives are binary operations and the likes.
-		   The string being the single character operator +, *, etc..
-
-	Exp  -> Exp + Exp2
-	Exp  -> Exp - Exp2
-	Exp  -> Exp2
-	Exp2 -> Exp * Exp3
-	Exp2 -> Exp / Exp3
-	Exp2 -> Exp3
-	Exp3 -> num
-	Exp3 -> ( Exp )
-
-   ----------- */
-
 static bool test_next(LexerState* ls, int c) {
 	if (ls->t.token == c) {
 		ProcessNextToken(ls);
@@ -85,116 +43,6 @@ static bool check_next(LexerState* ls, int c) {
 		return true;
 	}
 	return false;
-}
-
-void LL1(LexerState* ls) {
-	int table[E_Count][TK_COUNT];
-	memset(table, -1, sizeof(table));
-
-	//table[E_Hole][TK_INT] = 0;
-
-	table[E_BinOp][TK_ADD] = 1;
-	table[E_BinOp][TK_SUB] = 2;
-	table[E_BinOp][TK_EOZ] = 3;
-
-	std::stack<Exp*> expStack;
-	
-	ProcessNextToken(ls);
-
-	while (!expStack.empty()) {
-		Exp* top = expStack.top();
-		if (top->expType == E_Integer || top->expType == E_BinOp) {
-			expStack.pop();
-
-			switch (top->expType) {
-			case E_Integer:
-				{
-				
-				} break;
-			case E_BinOp: 
-				{
-					
-				} break;
-			}
-
-			ProcessNextToken(ls);
-		}
-		else if (table[top->expType][ls->t.token] == -1) {
-			FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
-		}
-		else {
-			Exp* nonTerminal = top; expStack.pop();
-			
-			switch (table[top->expType][ls->t.token]) {
-			case 0: {} break;
-			case 1: {} break;
-			case 2: {} break;
-			case 3: { expStack.pop(); } break; // return a hole that needs to be filled by the first int?
-			}
-
-		}
-	}
-
-	//PrintDebug("LL(1) Table-driven evaluation of output expression[ %s ]: %d.\n", toString(e).c_str(), eval(e).v.i);
-}
-
-static void PrimaryExpression(LexerState* ls) {
-
-	if (ls->t.token == TK_INT || ls->t.token == TK_SEPL) {
-		SecondaryExpression(ls);
-		SuffixedExpression(ls);
-	} else 
-		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
-}
-static void SecondaryExpression(LexerState* ls) {
-	if (ls->t.token == TK_INT || ls->t.token == TK_SEPL) {
-		SimpleExpression(ls);
-		SuffixedSecondaryExpression(ls);
-	} else
-		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
-}	
-static void SuffixedExpression(LexerState* ls) {
-	if (ls->t.token == TK_ADD) {
-		check_match(ls, TK_ADD, '+', ls->t.line);
-		SecondaryExpression(ls);
-		SuffixedExpression(ls);
-	}
-	else if (ls->t.token == TK_SUB) {
-		check_match(ls, TK_SUB, '-', ls->t.line);
-		SecondaryExpression(ls);
-		SuffixedExpression(ls);
-	}
-	else if(ls->t.token == TK_SEPR || ls->t.token == TK_EOZ) {
-
-	} else
-		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
-}
-static void SuffixedSecondaryExpression(LexerState* ls) {
-	if (ls->t.token == TK_ADD || ls->t.token == TK_SUB ||
-		ls->t.token == TK_SEPR || ls->t.token == TK_EOZ) {
-	}
-	else if (ls->t.token == TK_MUL) {
-		check_match(ls, TK_MUL, TK_MUL, ls->lookahead.line);
-		SimpleExpression(ls);
-		SuffixedSecondaryExpression(ls);
-	}
-	else if (ls->t.token == TK_DIV) {
-		check_match(ls, TK_DIV, TK_DIV, ls->lookahead.line);
-		SimpleExpression(ls);
-		SuffixedSecondaryExpression(ls);
-	} else
-		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
-}
-static void SimpleExpression(LexerState* ls) {
-	if (ls->t.token == TK_INT) {
-		check_match(ls, TK_INT, 'n', ls->t.line);
-	}
-	else if (ls->t.token == TK_SEPL) {
-		check_match(ls, TK_SEPL, TK_SEPL, ls->lookahead.line);
-		PrimaryExpression(ls);
-		check_match(ls, TK_SEPR, TK_SEPR, ls->lookahead.line);
-	} else
-		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 }
 
 Exp* ParseExpression(LexerState* ls) {
@@ -350,11 +198,8 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 			FatalError("SyntaxError: Expected variable. Line: %d[%d ].", ls->lastLine, ls->lastCol);
 		check_match(ls, '=', '=', ls->t.line);
 		Exp* binding = ParseExpression(ls);
-		Exp* expr = EmptyExp();
-		if (check(ls, TK_IN)) {
-			check_match(ls, TK_IN, TK_IN, ls->t.line);
-			expr = ParseExpression(ls);
-		}
+		check_match(ls, TK_IN, TK_IN, ls->t.line);
+		Exp* expr = ParseExpression(ls);
 		check_match(ls, TK_END, TK_END, ls->t.line);
 		return LetExp(var, binding, expr);
 	} break;

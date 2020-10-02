@@ -153,6 +153,7 @@
     <ClInclude Include="local.hpp" />
     <ClInclude Include="parser.hpp" />
     <ClInclude Include="shared.hpp" />
+    <ClInclude Include="symtable.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="test.txt" />

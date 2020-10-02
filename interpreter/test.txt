@@ -1,2 +1,1 @@
-let x2_ = 2 end
-let win = 5 in win * x2_ end
+let win = 5 in ((win*5)/2)+3 end
