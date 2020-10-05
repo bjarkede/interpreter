@@ -61,9 +61,6 @@ static Exp* ParseExpressionBase(LexerState* ls) {
 			Buffer args;
 			AllocBuffer(args, sizeof(Expression*) * 5);
 			if (!test(ls, ')')) {
-				// @TODO: Push arguments to args and parse them.
-				// Do this while the next symbol is ','.
-				//args[len++] = ParseExpression(ls);
 				((Exp**)args.buffer)[args.writeIndex++] = ParseExpression(ls);
 				while (check_next(ls, ',')) {
 					((Exp**)args.buffer)[args.writeIndex++] = ParseExpression(ls);
@@ -200,10 +197,8 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 	} break;
 	case TK_LET: {
 		// Expr -> let VAR = Expr in Expr end 
-		// 
 		check_match(ls, TK_LET, TK_LET, ls->t.line);
 		Exp* e = ParseExpression(ls);
-	
 		switch (e->expType) {
 		case E_Variable: {
 			check_match(ls, '=', '=', ls->t.line);
@@ -229,24 +224,3 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 	}
 }
-
-void Parse(LexerState* ls) {
-	/*
-	std::vector<Expression*> expList;
-	// @TODO:
-	// Parse multiple expressions.
-	ProcessNextToken(ls);
-	while (ls->t.token != TK_EOZ) {
-		expList.push_back(ParseExpression(ls));
-	}
-
-	PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
-	PrintDebug("Testing AST Interpretation:\n");
-
-	for (auto& e : expList) {
-		PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(e).c_str(), eval(e).v);
-	}
-	*/
-	
-}
-

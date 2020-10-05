@@ -13,6 +13,7 @@
 
 enum ValueType {
 	V_Integer,
+	V_Float,
 	V_Variable,
 	V_Bool,
 	V_String,
@@ -28,6 +29,10 @@ typedef struct Value {
 typedef struct IntVal : public Value {
 	L_INTEGER i;
 } IntVal;
+
+typedef struct FloatVal : public Value {
+	double f;
+};
 
 typedef struct BoolVal : public Value {
 	L_BOOL b;
@@ -47,14 +52,15 @@ typedef struct Closure : public Value {
 // Values
 Value* MakeIntegerVal(L_INTEGER i);
 Value* MakeStringVal(L_STRING s);
+Value* MakeFloatVal(double f);
 Value* MakeClosureVal(const char* f,
 					  Buffer x,
 	                  Expression* fbody,
 					  symtable<Value*> fdeclenv);
 
 // Interpreting
-Value* eval(Expression* Expr);
-Value* lookup(const char* name);
+Value* eval(Expression* Expr, symtable<Value*> env);
+Value* lookup(const char* name, symtable<Value*> env);
 
 // Utility
 std::string toString(Expression* Expr);

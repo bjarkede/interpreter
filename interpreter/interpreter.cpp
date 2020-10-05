@@ -1,6 +1,5 @@
 #include "interpreter.hpp"
 
-
 // @TODO:
 // symbol tabels, a bunch of expressions. etc.
 
@@ -13,10 +12,9 @@ struct cmp_str
 };
  
 //static std::map<const char*, Value*, cmp_str> valueenv;
-static symtable<Value*> valueenv;
 
-Value* lookup(const char* name) {
-	Value* result = valueenv.lookup(name);
+Value* lookup(const char* name, symtable<Value*> env) {
+	Value* result = env.lookup(name);
 	if (result->vType == V_NoType) FatalError("InterpreterError: Couldn't find variable [%s] in value environment.", name);
 	return result;
 	/*auto it = valueenv.find(name);
@@ -26,8 +24,7 @@ Value* lookup(const char* name) {
 	FatalError("InterpreterError: Couldn't find variable [%s] in value environment.", name);
 }
 
-Value* eval(Expression* e) {
-		
+Value* eval(Expression* e, symtable<Value*> env) {
 	switch (e->expType) {
 	case E_Integer:
 	{
@@ -35,28 +32,56 @@ Value* eval(Expression* e) {
 	} break;
 	case E_Variable:
 	{
-		return lookup(((Var*)e)->name);
+		return lookup(((Var*)e)->name, env);
 	} break;
 	case E_LetBinding: {
-		Value* xval = eval(((Let*)e)->binding);
-		valueenv.bind(xval, ((Var*)((Let*)e)->variable)->name);
-		return eval(((Let*)e)->expr);
+		Value* xval = eval(((Let*)e)->binding, env);
+		env.bind(xval, ((Var*)((Let*)e)->variable)->name);
+		return eval(((Let*)e)->expr, env);
 	} break;
 	case E_LetFun: {
-		/*auto bodyenv = valueenv;
-		auto x = MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), valueenv);
-//		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), valueenv),(((LetFun*)e)->f));
+		/*bodyenv = valueenv;
+		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), valueenv),(((LetFun*)e)->f));
 		return eval(((LetFun*)e)->letbody);*/
+	} break;
+	case E_Call: {
+		auto fClosure = eval(((Call*)e)->eFun, env);
+		if (fClosure->vType == V_Closure) {
+			symtable<Value*> fbodyenv = ((Closure*)fClosure)->fdeclenv;
+			
+			Buffer varNames = ((Closure*)fClosure)->x;
+			Buffer varValues;
+			AllocBuffer(varValues, sizeof(Value) * 5);
+			
+			for (int i = 0; i < varNames.writeIndex; i++) {
+				auto x = eval(((Exp**)varNames.buffer)[i], env);
+				//fbodyenv.bind(((Value**)varValues.buffer)[i], ((Var*)((Exp**)varNames.buffer)[i])->name);
+			}
+		}
 	} break;
 	case E_BinOp:
 	{
-		Value* lvalue = eval(((BinOp*)e)->left);
-		Value* rvalue = eval(((BinOp*)e)->right);
+		Value* lvalue = eval(((BinOp*)e)->left, env);
+		Value* rvalue = eval(((BinOp*)e)->right, env);
 
 		switch (((BinOp*)e)->opType) {
 		case Add:
 		{
-			return MakeIntegerVal(((IntVal*)lvalue)->i + ((IntVal*)rvalue)->i);
+			switch (lvalue->vType) {
+			case V_Integer:
+			{
+				switch (rvalue->vType) {
+				case V_Integer: { return MakeIntegerVal(((IntVal*)lvalue)->i + ((IntVal*)rvalue)->i); }
+				case V_Float: { return MakeFloatVal(((IntVal*)lvalue)->i + ((FloatVal*)rvalue)->f); }
+				}
+			} break;
+			case V_Float: {
+				switch (rvalue->vType) {
+				case V_Integer: { return MakeIntegerVal(((FloatVal*)lvalue)->f + ((IntVal*)rvalue)->i); }
+				case V_Float: { return MakeFloatVal(((FloatVal*)lvalue)->f + ((FloatVal*)rvalue)->f); }
+				}
+			}
+			}
 		} break;
 		case Sub:
 		{
@@ -73,7 +98,7 @@ Value* eval(Expression* e) {
 		}
 	} break;
 	case E_Paren: {
-		return eval(((Paren*)e)->expr);
+		return eval(((Paren*)e)->expr, env);
 	} break;
 	}
 }
@@ -155,15 +180,22 @@ Value* MakeStringVal(L_STRING s) {
 	return v;
 }
 
+Value* MakeFloatVal(double f) {
+	FloatVal* v = (FloatVal*)malloc(sizeof(FloatVal));
+	v->vType = V_Float;
+	v->f = f;
+	return v;
+}
+
 Value* MakeClosureVal(const char* f,
 	Buffer x,
 	Expression* fbody,
 	symtable<Value*> fdeclenv) {
-	Closure* v = (Closure*)malloc(sizeof(Closure));
+	Closure* v = new Closure;
 	v->vType = V_Closure;
 	v->f = f;
 	v->x = x;
 	v->fbody = fbody;
-	//v->fdeclenv = fdeclenv;
+	v->fdeclenv = fdeclenv;
 	return v;
 }

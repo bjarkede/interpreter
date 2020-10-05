@@ -40,6 +40,7 @@ private:
 protected:
 public:
 	symtable();
+	symtable(symtable<T> const& other);
 	~symtable();
 
 	void empty();
@@ -50,6 +51,13 @@ public:
 
 	T& operator[] (const char* name);
 
+	template <typename U>
+	symtable<T>& operator = (symtable<T> const& other) {
+		for (int i = 0; i < other.capacity(); i++) {
+			buffer[i] = other.buffer[i];
+		}
+		return *this;
+	}
 	enum DefineSize {
 		AllocateSpace = 701 // We cant use a table size of power of 2 so we use size = 2^p - 1
 	};
@@ -88,6 +96,15 @@ void symtable<T>::bind(T value, const char* key) {
 }
 
 template <typename T>
+symtable<T>::symtable(symtable<T> const& other) {
+	buffer = other.buffer;
+
+
+	auxStack = other.auxStack;
+	m = other.m;
+}
+
+template <typename T>
 T symtable<T>::lookup(const char* key) {
 	for (int i = 0; i < m; ++i) {
 		int j = h(key, i);
@@ -103,7 +120,7 @@ T symtable<T>::lookup(const char* key) {
 
 template <typename T>
 void symtable<T>::reallocate(int num) {
-	if (AllocateSpace * num <= m) {
+	/*if (AllocateSpace * num <= m) {
 		if (num <= 0) {
 			if (num < 0) FatalError("SymTable: Tried allocating less than 0.");
 			if (buffer) delete[] buffer;
@@ -112,7 +129,7 @@ void symtable<T>::reallocate(int num) {
 		}
 
 		return;
-	}
+	}*/
 
 	if (old_buffer) delete[] old_buffer;
 
@@ -139,15 +156,15 @@ symtable<T>::symtable() {
 	
 	empty();
 
-	for (int i = 0; i < m; i++)
-		buffer[i].key = "";
+	/*for (int i = 0; i < m; i++)
+		buffer[i].key = "";*/
 
 	PrintDebug("Allocated symbol table.\n");
 }
 
 template <typename T>
 symtable<T>::~symtable() {
-	reallocate(0);
+	//reallocate(0);
 }
 
 // When a scope is entered a 'marker' is pushed onto the auxiliary stack.

@@ -3,6 +3,8 @@
 #include "interpreter.hpp"
 #include "symtable.hpp"
 
+symtable<Value*> valueenv;
+
 // @Debug:
 // We use this main to test the functions used in the lexer.
 int main(int argc, char** argv) {
@@ -24,7 +26,11 @@ int main(int argc, char** argv) {
 	PrintDebug("Testing AST Interpretation:\n");
 
 	for (auto& e : expList) {
-		PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(e).c_str(), 0);
+		PrintDebug("Expression: [ %s ]\n", toString(e).c_str());
+		auto v = eval(e, valueenv);
+		switch (v->vType) {
+		case V_Integer: { PrintDebug("Value: %d\n\n", ((IntVal*)v)->i); }
+		}
 	}
 
     PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
