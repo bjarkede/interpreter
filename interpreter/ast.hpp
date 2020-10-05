@@ -34,6 +34,7 @@ enum ExpressionType
 	E_LetBinding,
 	E_LetFun,
 	E_BinOp,
+	E_Call,
 	E_UnOp,
 	E_Paren,
 	E_NoType,
@@ -75,10 +76,15 @@ typedef struct Let : public Expression {
 
 typedef struct LetFun : public Expression {
 	const char* f;
-	char** x;
+	Buffer x;
 	Expression* fbody;
 	Expression* letbody;
 } LetFun;
+
+typedef struct Call : public Expression {
+	Expression* eFun;
+	Buffer args;
+} Call;
 
 // Empty
 Expression* EmptyExp();
@@ -96,6 +102,7 @@ Expression* UnaryExp(UnOpType op, Expression* expr);
 
 // Let-bindings
 Expression* LetExp(Expression* var, Expression* binding, Expression* expr);
-Expression* LetFunExp(const char* f, char** x, Expression* fbody, Expression* letbody);
+Expression* LetFunExp(const char* f, Buffer x, Expression* fbody, Expression* letbody);
+Expression* CallExp(Expression* eFun, Buffer args);
 
 #endif

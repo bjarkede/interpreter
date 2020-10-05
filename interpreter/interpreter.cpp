@@ -43,9 +43,10 @@ Value* eval(Expression* e) {
 		return eval(((Let*)e)->expr);
 	} break;
 	case E_LetFun: {
-		auto bodyenv = valueenv;
-		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), valueenv),(((LetFun*)e)->f));
-		return eval(((LetFun*)e)->letbody);
+		/*auto bodyenv = valueenv;
+		auto x = MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), valueenv);
+//		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), valueenv),(((LetFun*)e)->f));
+		return eval(((LetFun*)e)->letbody);*/
 	} break;
 	case E_BinOp:
 	{
@@ -84,7 +85,7 @@ std::string toString(Expression* e) {
 	std::ostringstream buffer;
 
 	switch (e->expType) {
-	case E_Integer: 
+	case E_Integer:
 	{
 		buffer << ((Integer*)e)->value;
 	} break;
@@ -101,10 +102,37 @@ std::string toString(Expression* e) {
 		buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " in " << toString(((Let*)e)->expr) << " end";
 	} break;
 	case E_LetFun: {
-		buffer << "let " << (((LetFun*)e)->f) << "(";;
+		Exp** x = (Exp**)((Call*)e)->args.buffer;
 
+		buffer << "let " << (((LetFun*)e)->f) << "(";;
+		if (((Call*)e)->args.writeIndex > 1) { // If there's more than one variable
+			for (int i = 0; i < ((Call*)e)->args.writeIndex - 1; i++) {
+				buffer << toString(x[i]) << ",";
+			}
+			buffer << toString(x[((Call*)e)->args.writeIndex-1]);
+		}
+		else {
+			buffer << toString(x[0]);
+		}
 		buffer << ") = " << toString(((LetFun*)e)->fbody) << " in " << toString(((LetFun*)e)->letbody) << " end";
 	} break;
+	case E_Call: {
+		Exp** x = (Exp**)((Call*)e)->args.buffer;
+
+		buffer << toString(((Call*)e)->eFun) << "(";
+		if (((Call*)e)->args.writeIndex > 1) {
+			for (int i = 0; i < ((Call*)e)->args.writeIndex - 1; i++) {
+				buffer << toString(x[i]) << ",";
+			}
+			buffer << toString(x[((Call*)e)->args.writeIndex - 1]);
+		}
+		else {
+			buffer << toString(x[0]);
+		}
+		buffer << ")";
+	} break;
+	default:
+		buffer << "";
 	}
 
 	return buffer.str();
@@ -128,7 +156,7 @@ Value* MakeStringVal(L_STRING s) {
 }
 
 Value* MakeClosureVal(const char* f,
-	char** x,
+	Buffer x,
 	Expression* fbody,
 	symtable<Value*> fdeclenv) {
 	Closure* v = (Closure*)malloc(sizeof(Closure));
@@ -136,6 +164,6 @@ Value* MakeClosureVal(const char* f,
 	v->f = f;
 	v->x = x;
 	v->fbody = fbody;
-	v->fdeclenv = fdeclenv;
+	//v->fdeclenv = fdeclenv;
 	return v;
 }

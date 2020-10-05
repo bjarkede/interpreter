@@ -1,1 +1,1 @@
-let win = 2 in win + 2 end
+let win(x, y) = x*y in win(2,2) end

@@ -39,7 +39,7 @@ typedef struct StringVal : public Value {
 
 typedef struct Closure : public Value {
 	const char* f;
-	char** x;
+	Buffer x;
 	Expression* fbody;
 	symtable<Value*> fdeclenv;
 } Closure;
@@ -48,7 +48,7 @@ typedef struct Closure : public Value {
 Value* MakeIntegerVal(L_INTEGER i);
 Value* MakeStringVal(L_STRING s);
 Value* MakeClosureVal(const char* f,
-					  char** x,
+					  Buffer x,
 	                  Expression* fbody,
 					  symtable<Value*> fdeclenv);
 

@@ -26,13 +26,21 @@ Expression* LetExp(Expression* var, Expression* binding, Expression* expr) {
 	return e;
 }
 
-Expression* LetFunExp(const char* f, char** x, Expression* fbody, Expression* letbody) {
+Expression* LetFunExp(const char* f, Buffer x, Expression* fbody, Expression* letbody) {
 	LetFun* e = (LetFun*)malloc(sizeof(LetFun));
 	e->expType = E_LetFun;
 	e->f = f;
 	e->x = x;
 	e->fbody = fbody;
 	e->letbody = letbody;
+	return e;
+}
+
+Expression* CallExp(Expression* eFun, Buffer args) {
+	Call* e = (Call*)malloc(sizeof(Call));
+	e->expType = E_Call;
+	e->eFun = eFun;
+	e->args = args;
 	return e;
 }
 

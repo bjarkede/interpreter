@@ -55,18 +55,22 @@ static bool IsUnaryOperator(LexerState* ls) {
 
 static Exp* ParseExpressionBase(LexerState* ls) {
 	Exp* expr = ParseExpressionOperand(ls);
+	int len = 0;
 	while (test(ls, '(') || test(ls, '[') || test(ls, '.')) {
 		if (check_next(ls, '(')) {
-			Exp** args = NULL;
+			Buffer args;
+			AllocBuffer(args, sizeof(Expression*) * 5);
 			if (!test(ls, ')')) {
 				// @TODO: Push arguments to args and parse them.
 				// Do this while the next symbol is ','.
-				
+				//args[len++] = ParseExpression(ls);
+				((Exp**)args.buffer)[args.writeIndex++] = ParseExpression(ls);
 				while (check_next(ls, ',')) {
-
+					((Exp**)args.buffer)[args.writeIndex++] = ParseExpression(ls);
 				}
 			}
 			check_match(ls, ')', '(', ls->t.line);
+			expr = CallExp(expr, args);
 		}
 		else {
 
@@ -198,15 +202,28 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 		// Expr -> let VAR = Expr in Expr end 
 		// 
 		check_match(ls, TK_LET, TK_LET, ls->t.line);
-		Exp* var = ParseExpression(ls);
-		if (var->expType != E_Variable)
-			FatalError("SyntaxError: Expected variable. Line: %d[%d ].", ls->lastLine, ls->lastCol);
-		check_match(ls, '=', '=', ls->t.line);
-		Exp* binding = ParseExpression(ls);
-		check_match(ls, TK_IN, TK_IN, ls->t.line);
-		Exp* expr = ParseExpression(ls);
-		check_match(ls, TK_END, TK_END, ls->t.line);
-		return LetExp(var, binding, expr);
+		Exp* e = ParseExpression(ls);
+	
+		switch (e->expType) {
+		case E_Variable: {
+			check_match(ls, '=', '=', ls->t.line);
+			Exp* binding = ParseExpression(ls);
+			check_match(ls, TK_IN, TK_IN, ls->t.line);
+			Exp* expr = ParseExpression(ls);
+			check_match(ls, TK_END, TK_END, ls->t.line);
+			return LetExp(e, binding, expr);
+		} break;
+		case E_Call: {
+			check_match(ls, '=', '=', ls->t.line);
+			Exp* fbody = ParseExpression(ls);
+			check_match(ls, TK_IN, TK_IN, ls->t.line);
+			Exp* letbody = ParseExpression(ls);
+			check_match(ls, TK_END, TK_END, ls->t.line);
+			return LetFunExp(((Var*)((Call*)e)->eFun)->name, ((Call*)e)->args, fbody, letbody);
+		} break;
+		default:
+			FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
+		}
 	} break;
 	default:
 		FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);

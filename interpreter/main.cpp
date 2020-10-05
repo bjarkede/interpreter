@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 	PrintDebug("Testing AST Interpretation:\n");
 
 	for (auto& e : expList) {
-		PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(e).c_str(), ((IntVal*)eval(e))->i);
+		PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(e).c_str(), 0);
 	}
 
     PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
