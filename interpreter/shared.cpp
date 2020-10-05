@@ -100,7 +100,7 @@ void FatalError(const char* format, ...) {
 	vsprintf(msg, format, ap);
 	va_end(ap);
 
-	fprintf(stderr, "FATAL ERROR: %s", msg);
+	fprintf(stderr, "FATAL ERROR: %s\n", msg);
 
 	exit(1);
 }

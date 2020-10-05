@@ -3,6 +3,7 @@
 
 #include "ast.hpp"
 #include "local.hpp"
+#include "symtable.hpp"
 
 // @Nocheckin
 #include <string>
@@ -10,23 +11,50 @@
 #include <iostream>
 #include <map>
 
+enum ValueType {
+	V_Integer,
+	V_Variable,
+	V_Bool,
+	V_String,
+	V_Closure,
+	V_NoType,
+	V_Count
+};
+
 typedef struct Value {
-	enum { Integer, String, Bool } type;
-	union
-	{
-		L_INTEGER i;
-		L_STRING s;
-		L_BOOL l;
-	} v;
+	ValueType vType;
 } Value;
 
-// Interpreting
-Value eval(Expression* Expr);
+typedef struct IntVal : public Value {
+	L_INTEGER i;
+} IntVal;
 
-// Lookup-functions
-// int lookup(const char* varName);
-// Value lookup(const char* varName);
-Value lookup(const char* name);
+typedef struct BoolVal : public Value {
+	L_BOOL b;
+} BoolVal;
+
+typedef struct StringVal : public Value {
+	L_STRING s;
+} StringVal;
+
+typedef struct Closure : public Value {
+	const char* f;
+	char** x;
+	Expression* fbody;
+	symtable<Value*> fdeclenv;
+} Closure;
+
+// Values
+Value* MakeIntegerVal(L_INTEGER i);
+Value* MakeStringVal(L_STRING s);
+Value* MakeClosureVal(const char* f,
+					  char** x,
+	                  Expression* fbody,
+					  symtable<Value*> fdeclenv);
+
+// Interpreting
+Value* eval(Expression* Expr);
+Value* lookup(const char* name);
 
 // Utility
 std::string toString(Expression* Expr);

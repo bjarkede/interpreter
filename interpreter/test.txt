@@ -1,1 +1,1 @@
-let win = 5 in ((win*5)/2)+3 end
+let win = 2 in win + 2 end

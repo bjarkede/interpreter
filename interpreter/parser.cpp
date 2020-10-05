@@ -61,6 +61,10 @@ static Exp* ParseExpressionBase(LexerState* ls) {
 			if (!test(ls, ')')) {
 				// @TODO: Push arguments to args and parse them.
 				// Do this while the next symbol is ','.
+				
+				while (check_next(ls, ',')) {
+
+				}
 			}
 			check_match(ls, ')', '(', ls->t.line);
 		}
@@ -192,6 +196,7 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 	} break;
 	case TK_LET: {
 		// Expr -> let VAR = Expr in Expr end 
+		// 
 		check_match(ls, TK_LET, TK_LET, ls->t.line);
 		Exp* var = ParseExpression(ls);
 		if (var->expType != E_Variable)

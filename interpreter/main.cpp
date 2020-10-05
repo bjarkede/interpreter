@@ -24,17 +24,25 @@ int main(int argc, char** argv) {
 	PrintDebug("Testing AST Interpretation:\n");
 
 	for (auto& e : expList) {
-		PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(e).c_str(), eval(e).v);
+		PrintDebug("Expression: [ %s ]\n       Value: %d\n\n", toString(e).c_str(), ((IntVal*)eval(e))->i);
 	}
 
     PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
-
+	
+	/*
 	symtable<Value> sTable;
 	Value v;
 	v.v.i = 10;
 	sTable.bind(v, "xyz");
 	auto x = sTable.lookup("xyz");
-
+	v.v.i = 11;
+	sTable.bind(v, "xyz");
+	sTable.enter();
+	sTable.bind(v, "yzx");
+	sTable.bind(v, "zxy");
+	sTable.bind(v, "yxz");
+	sTable.exit();
+	*/
 
 
     return 1;

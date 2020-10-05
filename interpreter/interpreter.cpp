@@ -1,5 +1,5 @@
 #include "interpreter.hpp"
-#include "symtable.hpp"
+
 
 // @TODO:
 // symbol tabels, a bunch of expressions. etc.
@@ -12,66 +12,67 @@ struct cmp_str
 	}
 };
  
-//static std::map<const char*, Value, cmp_str> valueenv;
-static symtable<Value> valueenv;
+//static std::map<const char*, Value*, cmp_str> valueenv;
+static symtable<Value*> valueenv;
 
-Value lookup(const char* name) {
-	return valueenv.lookup(name);
+Value* lookup(const char* name) {
+	Value* result = valueenv.lookup(name);
+	if (result->vType == V_NoType) FatalError("InterpreterError: Couldn't find variable [%s] in value environment.", name);
+	return result;
+	/*auto it = valueenv.find(name);
+	if (it != valueenv.end())
+		return it->second;*/
+
+	FatalError("InterpreterError: Couldn't find variable [%s] in value environment.", name);
 }
 
-Value eval(Expression* e) {
-	
-	Value v;
-	
+Value* eval(Expression* e) {
+		
 	switch (e->expType) {
 	case E_Integer:
 	{
-		v.v.i = ((Integer*)e)->value;
-		return v;
+		return MakeIntegerVal((((Integer*)e)->value));
 	} break;
 	case E_Variable:
 	{
-		v = lookup(((Var*)e)->name);
-		return v;
+		return lookup(((Var*)e)->name);
 	} break;
 	case E_LetBinding: {
-		Value xval = eval(((Let*)e)->binding);
+		Value* xval = eval(((Let*)e)->binding);
 		valueenv.bind(xval, ((Var*)((Let*)e)->variable)->name);
-		v = eval(((Let*)e)->expr);
-		return v;
+		return eval(((Let*)e)->expr);
+	} break;
+	case E_LetFun: {
+		auto bodyenv = valueenv;
+		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), valueenv),(((LetFun*)e)->f));
+		return eval(((LetFun*)e)->letbody);
 	} break;
 	case E_BinOp:
 	{
-
-		Value lvalue = eval(((BinOp*)e)->left);
-		Value rvalue = eval(((BinOp*)e)->right);
+		Value* lvalue = eval(((BinOp*)e)->left);
+		Value* rvalue = eval(((BinOp*)e)->right);
 
 		switch (((BinOp*)e)->opType) {
 		case Add:
 		{
-			v.v.i = lvalue.v.i + rvalue.v.i;
-			return v;
+			return MakeIntegerVal(((IntVal*)lvalue)->i + ((IntVal*)rvalue)->i);
 		} break;
 		case Sub:
 		{
-			v.v.i = lvalue.v.i - rvalue.v.i;
-			return v;
+			return MakeIntegerVal(((IntVal*)lvalue)->i - ((IntVal*)rvalue)->i);
 		} break;
 		case Mul:
 		{
-			v.v.i = lvalue.v.i * rvalue.v.i;
-			return v;
+			return MakeIntegerVal(((IntVal*)lvalue)->i * ((IntVal*)rvalue)->i);
 		} break;
 		case Div:
 		{
-			v.v.i = lvalue.v.i / rvalue.v.i;
-			return v;
+			return MakeIntegerVal(((IntVal*)lvalue)->i / ((IntVal*)rvalue)->i);
 		}
 		}
 	} break;
 	case E_Paren: {
-		v = eval(((Paren*)e)->expr);
-		return v;
+		return eval(((Paren*)e)->expr);
 	} break;
 	}
 }
@@ -99,7 +100,42 @@ std::string toString(Expression* e) {
 	case E_LetBinding: {
 		buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " in " << toString(((Let*)e)->expr) << " end";
 	} break;
+	case E_LetFun: {
+		buffer << "let " << (((LetFun*)e)->f) << "(";;
+
+		buffer << ") = " << toString(((LetFun*)e)->fbody) << " in " << toString(((LetFun*)e)->letbody) << " end";
+	} break;
 	}
 
 	return buffer.str();
+}
+
+Value* MakeIntegerVal(L_INTEGER i) {
+	IntVal* v = (IntVal*)malloc(sizeof(IntVal));
+	v->vType = V_Integer;
+	v->i = i;
+	return v;
+}
+
+Value* MakeStringVal(L_STRING s) {
+	StringVal* v = (StringVal*)malloc(sizeof(StringVal));
+	v->vType = V_String;
+	v->s.contents = s.contents;
+	v->s.flags = s.flags;
+	v->s.length = s.length;
+	v->s.u = s.u;
+	return v;
+}
+
+Value* MakeClosureVal(const char* f,
+	char** x,
+	Expression* fbody,
+	symtable<Value*> fdeclenv) {
+	Closure* v = (Closure*)malloc(sizeof(Closure));
+	v->vType = V_Closure;
+	v->f = f;
+	v->x = x;
+	v->fbody = fbody;
+	v->fdeclenv = fdeclenv;
+	return v;
 }

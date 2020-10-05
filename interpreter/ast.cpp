@@ -26,6 +26,16 @@ Expression* LetExp(Expression* var, Expression* binding, Expression* expr) {
 	return e;
 }
 
+Expression* LetFunExp(const char* f, char** x, Expression* fbody, Expression* letbody) {
+	LetFun* e = (LetFun*)malloc(sizeof(LetFun));
+	e->expType = E_LetFun;
+	e->f = f;
+	e->x = x;
+	e->fbody = fbody;
+	e->letbody = letbody;
+	return e;
+}
+
 Expression* IntegerExp(L_INTEGER i) {
 	Integer* e = (Integer*)malloc(sizeof(Integer));
 
