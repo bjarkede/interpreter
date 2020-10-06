@@ -41,6 +41,5 @@ int main(int argc, char** argv) {
 
     PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
 
-	
     return 1;
 }

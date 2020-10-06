@@ -8,7 +8,7 @@ enum BinaryOpType {
 	Add, Sub, Mul, Mod, Pow,
 	Div, IDiv,
 	// Comparison
-	Equal, LT,
+	Equal, Less,
 	// Logical
 	And, Or,
 	// Others

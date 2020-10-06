@@ -90,8 +90,17 @@ Value* eval(Expression* e, symtable<Value*> env) {
 		}
 		case Equal:
 		{
-			if (lvalue->vType == V_Integer || rvalue->vType == V_Integer) {
+			if (lvalue->vType == V_Integer && rvalue->vType == V_Integer) {
 				return MakeIntegerVal(((IntVal*)lvalue)->i == ((IntVal*)rvalue)->i ? 1 : 0);
+			}
+			else {
+				FatalError("InterpreterError: Unknown primitive or wrong type in [if]-expression.");
+			}
+		} break;
+		case Less:
+		{
+			if (lvalue->vType == V_Integer && rvalue->vType == V_Integer) {
+				return MakeIntegerVal(((IntVal*)lvalue)->i < ((IntVal*)rvalue)->i ? 1 : 0);
 			}
 			else {
 				FatalError("InterpreterError: Unknown primitive or wrong type in [if]-expression.");
@@ -107,7 +116,7 @@ Value* eval(Expression* e, symtable<Value*> env) {
 
 std::string toString(Expression* e) {
 
-	static const char* operands[] = { "+", "-", "*", "%", "^", "/", "", "==" };
+	static const char* operands[] = { "+", "-", "*", "%", "^", "/", "", "==", "<" };
 
 	std::ostringstream buffer;
 

@@ -181,6 +181,7 @@ static BinaryOpType GetBinaryOperator(int op) {
 	case '^': return Pow;
 	case '/': return Div;
 	case TK_EQ: return Equal;
+	case '<': return Less;
 	default:
 		return NoBinOp;
 	}
