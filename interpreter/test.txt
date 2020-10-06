@@ -1,2 +1,1 @@
-let win = 2 in win+2 end
-let win(x,y) = x*y in win(2,2) end
+let pow(x, n) = if n == 0 then 1 else x * pow(x, n-1) in pow(3, 8) end

@@ -8,7 +8,7 @@ enum BinaryOpType {
 	Add, Sub, Mul, Mod, Pow,
 	Div, IDiv,
 	// Comparison
-	EQ, LT,
+	Equal, LT,
 	// Logical
 	And, Or,
 	// Others
@@ -33,6 +33,7 @@ enum ExpressionType
 	E_Variable,
 	E_LetBinding,
 	E_LetFun,
+	E_IfThenElse,
 	E_BinOp,
 	E_Call,
 	E_UnOp,
@@ -86,6 +87,12 @@ typedef struct Call : public Expression {
 	Buffer args;
 } Call;
 
+typedef struct IfThenElse : public Expression {
+	Expression* ifexp;
+	Expression* thenexp;
+	Expression* elseexp;
+} If;
+
 // Empty
 Expression* EmptyExp();
 
@@ -99,6 +106,9 @@ Expression* BinaryExp(BinaryOpType op, Expression* left, Expression* right);
 
 // Unary
 Expression* UnaryExp(UnOpType op, Expression* expr);
+
+// If
+Expression* IfThenElseExp(Expression* ifexp, Expression* thenexp, Expression* elseexp);
 
 // Let-bindings
 Expression* LetExp(Expression* var, Expression* binding, Expression* expr);

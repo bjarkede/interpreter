@@ -39,7 +39,17 @@ Value* eval(Expression* e, symtable<Value*> env) {
 			for (int i = 0; i < ((Call*)e)->args.writeIndex; i++) {
 				fbodyenv.bind(eval(((Expression**)((Call*)e)->args.buffer)[i], env), ((Var*)((Exp**)varNames.buffer)[i])->name);
 			}
+			fbodyenv.bind(fClosure, ((Var*)((Call*)e)->eFun)->name);
 			return eval(((Closure*)fClosure)->fbody, fbodyenv); // Now we can evaluate the function.
+		}
+	} break;
+	case E_IfThenElse: {
+		auto data = eval(((If*)e)->ifexp, env);
+		if (data->vType == V_Integer) {
+			return (((IntVal*)data)->i != 0 ? eval(((If*)e)->thenexp, env) : eval(((If*)e)->elseexp, env));
+		}
+		else {
+			FatalError("InterpreterError: Didn't get a boolean when interpreting [if]-expression.");
 		}
 	} break;
 	case E_BinOp:
@@ -78,6 +88,15 @@ Value* eval(Expression* e, symtable<Value*> env) {
 		{
 			return MakeIntegerVal(((IntVal*)lvalue)->i / ((IntVal*)rvalue)->i);
 		}
+		case Equal:
+		{
+			if (lvalue->vType == V_Integer || rvalue->vType == V_Integer) {
+				return MakeIntegerVal(((IntVal*)lvalue)->i == ((IntVal*)rvalue)->i ? 1 : 0);
+			}
+			else {
+				FatalError("InterpreterError: Unknown primitive or wrong type in [if]-expression.");
+			}
+		} break;
 		}
 	} break;
 	case E_Paren: {
@@ -88,7 +107,7 @@ Value* eval(Expression* e, symtable<Value*> env) {
 
 std::string toString(Expression* e) {
 
-	static const char* operands[] = { "+", "-", "*", "%", "^", "/" };
+	static const char* operands[] = { "+", "-", "*", "%", "^", "/", "", "==" };
 
 	std::ostringstream buffer;
 
@@ -138,6 +157,9 @@ std::string toString(Expression* e) {
 			buffer << toString(x[0]);
 		}
 		buffer << ")";
+	} break;
+	case E_IfThenElse: {
+		buffer << "if " << toString(((If*)e)->ifexp) << " then " << toString(((If*)e)->thenexp) << " else " << toString(((If*)e)->elseexp);
 	} break;
 	default:
 		buffer << "";

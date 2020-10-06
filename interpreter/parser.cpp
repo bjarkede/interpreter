@@ -180,6 +180,7 @@ static BinaryOpType GetBinaryOperator(int op) {
 	case '%': return Mod;
 	case '^': return Pow;
 	case '/': return Div;
+	case TK_EQ: return Equal;
 	default:
 		return NoBinOp;
 	}
@@ -194,6 +195,14 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 		Exp* expr = ParseExpression(ls);
 		check_match(ls, ')', ')', ls->t.line);
 		return ParenExp(expr);
+	} break;
+	case TK_IF: {
+		check_match(ls, TK_IF, TK_IF, ls->t.line);
+		Exp* e1 = ParseExpression(ls);
+		check_match(ls, TK_THEN, TK_THEN, ls->t.line);
+		Exp* e2 = ParseExpression(ls);
+		check_match(ls, TK_ELSE, TK_ELSE, ls->t.line);
+		return IfThenElseExp(e1, e2, ParseExpression(ls));
 	} break;
 	case TK_LET: {
 		// Expr -> let VAR = Expr in Expr end 

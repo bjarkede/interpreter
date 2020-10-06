@@ -22,7 +22,7 @@ template <typename T>
 struct symtable {
 private:
 	typedef struct element {
-		const char* key = "";
+		const char* key = ""; // Set default value, so we can use strcmp
 		T value;
 	} E;
 

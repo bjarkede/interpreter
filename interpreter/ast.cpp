@@ -71,6 +71,15 @@ Expression* BinaryExp(BinaryOpType op, Expression* left, Expression* right) {
 	return e;
 }
 
+Expression* IfThenElseExp(Expression* ifexp, Expression* thenexp, Expression* elseexp) {
+	If* e = (If*)malloc(sizeof(If));
+	e->expType = E_IfThenElse;
+	e->ifexp = ifexp;
+	e->thenexp = thenexp;
+	e->elseexp = elseexp;
+	return e;
+}
+
 Expression* UnaryExp(UnOpType op, Expression* expr) {
 	UnOp* e = (UnOp*)malloc(sizeof(UnOp));
 
