@@ -1,7 +1,6 @@
 #ifndef SYMTABLE_HPP
 #define SYMTABLE_HPP
 
-#include "interpreter.hpp"
 #include "shared.hpp"
 
 #include <stack> // For testing!
@@ -23,7 +22,7 @@ template <typename T>
 struct symtable {
 private:
 	typedef struct element {
-		const char* key;
+		const char* key = "";
 		T value;
 	} E;
 
@@ -32,7 +31,7 @@ private:
 
 	std::stack<E> auxStack;
 
-	size_t m;
+	int m;
 
 	int h(const char* name, int i);
 
@@ -43,7 +42,7 @@ public:
 	symtable(symtable<T> const& other);
 	~symtable();
 
-	void empty();
+	void empty(int num);
 	void bind(T value, const char* key);
 	T lookup(const char* key);
 	void enter();
@@ -82,7 +81,7 @@ int symtable<T>::h(const char* value, int i) {
 
 template <typename T>
 void symtable<T>::bind(T value, const char* key) {
-	for (int i = 0; i < m; ++i) {
+	for (int i = 0; i < m; i++) {
 		int j = h(key, i);
 
 		// @TODO:
@@ -97,44 +96,38 @@ void symtable<T>::bind(T value, const char* key) {
 
 template <typename T>
 symtable<T>::symtable(symtable<T> const& other) {
-	buffer = other.buffer;
-
-
-	auxStack = other.auxStack;
+	//PrintDebug("Copy-constructor called\n");
+	buffer = new E[other.m];
+	old_buffer = new E[other.m];
 	m = other.m;
+
+	if (other.buffer)
+		memcpy(buffer, other.buffer, sizeof(E)*other.m);
+	if (other.old_buffer)
+		memcpy(old_buffer, other.old_buffer, sizeof(E) * other.m);
+	
+	auxStack = other.auxStack;
 }
 
 template <typename T>
 T symtable<T>::lookup(const char* key) {
-	for (int i = 0; i < m; ++i) {
+	for (int i = 0; i < m; i++) {
 		int j = h(key, i);
-		if (j > m) break;
+		if (j >= m) break;
 		if (buffer[j].key != NULL) {
 			if(strcmp(buffer[j].key, key) == 0)
 				return buffer[j].value;
 		}
-		return buffer[0].value;
 	}
 	FatalError("InterpreterError: Couldn't find variable [%s] in value environment.", key);
 }
 
 template <typename T>
 void symtable<T>::reallocate(int num) {
-	/*if (AllocateSpace * num <= m) {
-		if (num <= 0) {
-			if (num < 0) FatalError("SymTable: Tried allocating less than 0.");
-			if (buffer) delete[] buffer;
-			buffer = 0;
-			return;
-		}
-
-		return;
-	}*/
-
 	if (old_buffer) delete[] old_buffer;
 
 	E* new_buffer = 0;
-	new_buffer = new E[AllocateSpace*num];
+	new_buffer = new E[num];
 	if (new_buffer == 0) FatalError("InterpreterError: Failed allocating symbol table");
 	if (buffer) {
 		memcpy(new_buffer, buffer, sizeof(buffer));
@@ -142,45 +135,50 @@ void symtable<T>::reallocate(int num) {
 
 	old_buffer = buffer;
 	buffer = new_buffer;
-	m = AllocateSpace*num;
+	m = num;
 }
 
 template <typename T>
-void symtable<T>::empty() {
-	reallocate(1);
+void symtable<T>::empty(int num) {
+	if (num <= m) {
+		if (num <= 0) {
+			if(num < 0) FatalError("SymTable: Tried allocating less than 0.");
+			//if (buffer) delete[] buffer;
+			buffer = 0;
+			m = 0;
+			return;
+		}
+		return;
+	}
+
+	reallocate(num);
+	if (old_buffer) { delete[] old_buffer; old_buffer = 0; }
 }
 
 template <typename T>
 symtable<T>::symtable() {
 	buffer = old_buffer = 0;
-	
-	empty();
-
-	/*for (int i = 0; i < m; i++)
-		buffer[i].key = "";*/
-
-	PrintDebug("Allocated symbol table.\n");
+	m = 0;
+	//PrintDebug("Allocated symbol table.\n");
 }
 
 template <typename T>
 symtable<T>::~symtable() {
-	//reallocate(0);
+	//PrintDebug("Deallocated symbol table.\n");
+	empty(0);
 }
 
 // When a scope is entered a 'marker' is pushed onto the auxiliary stack.
 template <typename T>
 void symtable<T>::enter() {
-	/*Value v;
-	v.vType = Value::Type::NoType;
-	v.v.i = 0;
-	E marker = { "xmark",  v};
-	auxStack.push(marker);*/
+	E marker = { "xmark",  NULL};
+	auxStack.push(marker);
 }
 
 // Pop the auxiliary stack untill a marker is reached.
 template <typename T>
 void symtable<T>::exit() {
-	/*while (strcmp(auxStack.top().key, "xmark") != 0) {
+	while (strcmp(auxStack.top().key, "xmark") != 0) {
 		int j = h(auxStack.top().key, 0);
 
 		buffer[j].value = auxStack.top().value;
@@ -188,7 +186,7 @@ void symtable<T>::exit() {
 
 		auxStack.pop();
 	}
-	auxStack.pop();*/
+	auxStack.pop();
 }
 
 #endif

@@ -1,27 +1,9 @@
 #include "interpreter.hpp"
 
-// @TODO:
-// symbol tabels, a bunch of expressions. etc.
-
-struct cmp_str
-{
-	bool operator()(char const* a, char const* b) const
-	{
-		return std::strcmp(a, b) < 0;
-	}
-};
- 
-//static std::map<const char*, Value*, cmp_str> valueenv;
-
 Value* lookup(const char* name, symtable<Value*> env) {
 	Value* result = env.lookup(name);
 	if (result->vType == V_NoType) FatalError("InterpreterError: Couldn't find variable [%s] in value environment.", name);
 	return result;
-	/*auto it = valueenv.find(name);
-	if (it != valueenv.end())
-		return it->second;*/
-
-	FatalError("InterpreterError: Couldn't find variable [%s] in value environment.", name);
 }
 
 Value* eval(Expression* e, symtable<Value*> env) {
@@ -36,27 +18,28 @@ Value* eval(Expression* e, symtable<Value*> env) {
 	} break;
 	case E_LetBinding: {
 		Value* xval = eval(((Let*)e)->binding, env);
+		env.enter();
 		env.bind(xval, ((Var*)((Let*)e)->variable)->name);
-		return eval(((Let*)e)->expr, env);
+		Value* returnval = eval(((Let*)e)->expr, env); // Evaluate the expression in-scope.
+		env.exit();
+		return returnval;
 	} break;
 	case E_LetFun: {
-		/*bodyenv = valueenv;
-		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), valueenv),(((LetFun*)e)->f));
-		return eval(((LetFun*)e)->letbody);*/
+		symtable<Value*> bodyenv = env;
+		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), env),(((LetFun*)e)->f));
+		return eval(((LetFun*)e)->letbody, bodyenv);
 	} break;
 	case E_Call: {
 		auto fClosure = eval(((Call*)e)->eFun, env);
 		if (fClosure->vType == V_Closure) {
 			symtable<Value*> fbodyenv = ((Closure*)fClosure)->fdeclenv;
-			
 			Buffer varNames = ((Closure*)fClosure)->x;
-			Buffer varValues;
-			AllocBuffer(varValues, sizeof(Value) * 5);
-			
-			for (int i = 0; i < varNames.writeIndex; i++) {
-				auto x = eval(((Exp**)varNames.buffer)[i], env);
-				//fbodyenv.bind(((Value**)varValues.buffer)[i], ((Var*)((Exp**)varNames.buffer)[i])->name);
+			// Evaluate each expression in the function call arguments and
+			// bind them to the function body.
+			for (int i = 0; i < ((Call*)e)->args.writeIndex; i++) {
+				fbodyenv.bind(eval(((Expression**)((Call*)e)->args.buffer)[i], env), ((Var*)((Exp**)varNames.buffer)[i])->name);
 			}
+			return eval(((Closure*)fClosure)->fbody, fbodyenv); // Now we can evaluate the function.
 		}
 	} break;
 	case E_BinOp:
@@ -161,6 +144,12 @@ std::string toString(Expression* e) {
 	}
 
 	return buffer.str();
+}
+
+Value* MakeEmptyVal() {
+	Value* v = (Value*)malloc(sizeof(Value));
+	v->vType = V_NoType;
+	return v;
 }
 
 Value* MakeIntegerVal(L_INTEGER i) {

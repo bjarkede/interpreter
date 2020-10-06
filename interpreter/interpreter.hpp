@@ -50,6 +50,7 @@ typedef struct Closure : public Value {
 } Closure;
 
 // Values
+Value* MakeEmptyVal();
 Value* MakeIntegerVal(L_INTEGER i);
 Value* MakeStringVal(L_STRING s);
 Value* MakeFloatVal(double f);

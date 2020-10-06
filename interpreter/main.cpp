@@ -22,34 +22,25 @@ int main(int argc, char** argv) {
 		expList.push_back(ParseExpression(ls));
 	}
 
-	PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
-	PrintDebug("Testing AST Interpretation:\n");
+	//PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
+	//PrintDebug("Testing AST Interpretation:\n");
+
+	valueenv.empty(701);
 
 	for (auto& e : expList) {
 		PrintDebug("Expression: [ %s ]\n", toString(e).c_str());
 		auto v = eval(e, valueenv);
-		switch (v->vType) {
-		case V_Integer: { PrintDebug("Value: %d\n\n", ((IntVal*)v)->i); }
+		if (v != nullptr) {
+			switch (v->vType) {
+			case V_Integer: { PrintDebug("Value: %d\n\n", ((IntVal*)v)->i); } break;
+			default:
+			{}
+			}
 		}
 	}
 
     PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
+
 	
-	/*
-	symtable<Value> sTable;
-	Value v;
-	v.v.i = 10;
-	sTable.bind(v, "xyz");
-	auto x = sTable.lookup("xyz");
-	v.v.i = 11;
-	sTable.bind(v, "xyz");
-	sTable.enter();
-	sTable.bind(v, "yzx");
-	sTable.bind(v, "zxy");
-	sTable.bind(v, "yxz");
-	sTable.exit();
-	*/
-
-
     return 1;
 }

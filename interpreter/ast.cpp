@@ -3,7 +3,6 @@
 Expression* EmptyExp() {
 	Expression* e = (Expression*)malloc(sizeof(Expression));
 	e->expType = E_NoType;
-
 	return e;
 }
 
