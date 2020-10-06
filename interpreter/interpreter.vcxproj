@@ -146,6 +146,7 @@
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="shared.cpp" />
     <ClCompile Include="interpreter.cpp" />
+    <ClCompile Include="typechecker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ast.hpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="parser.hpp" />
     <ClInclude Include="shared.hpp" />
     <ClInclude Include="symtable.hpp" />
+    <ClInclude Include="typechecker.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="test.txt" />

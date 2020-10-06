@@ -1,12 +1,11 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "interpreter.hpp"
+#include "typechecker.hpp"
 #include "symtable.hpp"
 
 symtable<Value*> valueenv;
 
-// @Debug:
-// We use this main to test the functions used in the lexer.
 int main(int argc, char** argv) {
 
     LexerState* ls = (LexerState*)malloc(sizeof(LexerState));
@@ -22,14 +21,18 @@ int main(int argc, char** argv) {
 		expList.push_back(ParseExpression(ls));
 	}
 
-	//PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
-	//PrintDebug("Testing AST Interpretation:\n");
+	PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
 
-	valueenv.empty(701);
+	// @TODO:
+	// The by value passing of the valueenv is a major bottleneck.
+	// If we use a large hashmap, a lot of memory will be allocated at each
+	// recursive call in the interpreter.
+	// Consider an alternative. -bjarke, 6th octobor 2020.
+	valueenv.empty(13);
 
 	for (auto& e : expList) {
-		PrintDebug("Expression: [ %s ]\n", toString(e).c_str());
-		auto v = eval(e, valueenv);
+		PrintDebug("Expression: %s\n", toString(e).c_str());
+		auto v = eval(e, &valueenv);
 		if (v != nullptr) {
 			switch (v->vType) {
 			case V_Integer: { PrintDebug("Value: %d\n\n", ((IntVal*)v)->i); } break;

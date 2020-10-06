@@ -1,12 +1,12 @@
 #include "interpreter.hpp"
 
-Value* lookup(const char* name, symtable<Value*> env) {
-	Value* result = env.lookup(name);
+Value* lookup(const char* name, symtable<Value*>* env) {
+	Value* result = env->lookup(name);
 	if (result->vType == V_NoType) FatalError("InterpreterError: Couldn't find variable [%s] in value environment.", name);
 	return result;
 }
 
-Value* eval(Expression* e, symtable<Value*> env) {
+Value* eval(Expression* e, symtable<Value*>* env) {
 	switch (e->expType) {
 	case E_Integer:
 	{
@@ -18,16 +18,16 @@ Value* eval(Expression* e, symtable<Value*> env) {
 	} break;
 	case E_LetBinding: {
 		Value* xval = eval(((Let*)e)->binding, env);
-		env.enter();
-		env.bind(xval, ((Var*)((Let*)e)->variable)->name);
+		env->enter();
+		env->bind(xval, ((Var*)((Let*)e)->variable)->name);
 		Value* returnval = eval(((Let*)e)->expr, env); // Evaluate the expression in-scope.
-		env.exit();
+		env->exit();
 		return returnval;
 	} break;
 	case E_LetFun: {
-		symtable<Value*> bodyenv = env;
-		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), env),(((LetFun*)e)->f));
-		return eval(((LetFun*)e)->letbody, bodyenv);
+		symtable<Value*> bodyenv = *env;
+		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), *env),(((LetFun*)e)->f));
+		return eval(((LetFun*)e)->letbody, &bodyenv);
 	} break;
 	case E_Call: {
 		auto fClosure = eval(((Call*)e)->eFun, env);
@@ -40,7 +40,7 @@ Value* eval(Expression* e, symtable<Value*> env) {
 				fbodyenv.bind(eval(((Expression**)((Call*)e)->args.buffer)[i], env), ((Var*)((Exp**)varNames.buffer)[i])->name);
 			}
 			fbodyenv.bind(fClosure, ((Var*)((Call*)e)->eFun)->name);
-			return eval(((Closure*)fClosure)->fbody, fbodyenv); // Now we can evaluate the function.
+			return eval(((Closure*)fClosure)->fbody, &fbodyenv); // Now we can evaluate the function.
 		}
 	} break;
 	case E_IfThenElse: {

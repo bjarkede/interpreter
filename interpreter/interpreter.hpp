@@ -60,8 +60,8 @@ Value* MakeClosureVal(const char* f,
 					  symtable<Value*> fdeclenv);
 
 // Interpreting
-Value* eval(Expression* Expr, symtable<Value*> env);
-Value* lookup(const char* name, symtable<Value*> env);
+Value* eval(Expression* Expr, symtable<Value*>* env);
+Value* lookup(const char* name, symtable<Value*>* env);
 
 // Utility
 std::string toString(Expression* Expr);

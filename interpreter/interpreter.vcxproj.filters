@@ -36,6 +36,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="typechecker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shared.hpp">
@@ -58,6 +61,9 @@
     </ClInclude>
     <ClInclude Include="symtable.hpp">
       <Filter>Header Files\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="typechecker.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
