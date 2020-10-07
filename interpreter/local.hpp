@@ -18,9 +18,9 @@ typedef struct L_STRING {
 
 enum RESERVED {
 	TK_LET, TK_IF, TK_THEN, TK_ELSE, TK_IN, TK_END,
-	TK_BOOL, TK_VAR, TK_INT, TK_FLOAT,
+	TK_TRUE, TK_FALSE, TK_PRINT, TK_VAR, TK_INT, TK_FLOAT,
 	TK_EQ, TK_ASSN, TK_AND, TK_OR, TK_LE, TK_MIN, TK_MAX,
-	TK_SEPR, TK_SEPL, TK_COM, TK_FUNC,
+	TK_SEPR, TK_SEPL, TK_COM, TK_FUNC, TK_STRING,
 	TK_EOZ,
 
 	TK_ADD, TK_SUB, TK_MUL, TK_DIV,
@@ -29,7 +29,7 @@ enum RESERVED {
 };
 
 static const char* const tokens[] = {
-	"let", "if", "then", "else", "in", "end", "true", "false"
+	"let", "if", "then", "else", "in", "end", "true", "false", "print"
 };
 
 #define NUM_RESERVED ((int)(TK_COUNT));

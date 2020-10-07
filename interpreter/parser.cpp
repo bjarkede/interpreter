@@ -205,6 +205,13 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 		check_match(ls, TK_ELSE, TK_ELSE, ls->t.line);
 		return IfThenElseExp(e1, e2, ParseExpression(ls));
 	} break;
+	case TK_PRINT: {
+		ProcessNextToken(ls);
+		check_match(ls, '(', '(', ls->t.line);
+		Exp* expr = ParseExpression(ls);
+		check_match(ls, ')', ')', ls->t.line);
+		return PrintExp(expr);
+	} break;
 	case TK_LET: {
 		// Expr -> let VAR = Expr in Expr end 
 		check_match(ls, TK_LET, TK_LET, ls->t.line);
@@ -213,16 +220,22 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 		case E_Variable: {
 			check_match(ls, '=', '=', ls->t.line);
 			Exp* binding = ParseExpression(ls);
-			check_match(ls, TK_IN, TK_IN, ls->t.line);
-			Exp* expr = ParseExpression(ls);
+			Exp* expr = NULL;
+			if (check(ls, TK_IN)) {
+				check_match(ls, TK_IN, TK_IN, ls->t.line);
+				expr = ParseExpression(ls);
+			}
 			check_match(ls, TK_END, TK_END, ls->t.line);
 			return LetExp(e, binding, expr);
 		} break;
 		case E_Call: {
 			check_match(ls, '=', '=', ls->t.line);
 			Exp* fbody = ParseExpression(ls);
-			check_match(ls, TK_IN, TK_IN, ls->t.line);
-			Exp* letbody = ParseExpression(ls);
+			Exp* letbody = NULL;
+			if (check(ls, TK_IN)) {
+				check_match(ls, TK_IN, TK_IN, ls->t.line);
+				letbody = ParseExpression(ls);
+			}
 			check_match(ls, TK_END, TK_END, ls->t.line);
 			return LetFunExp(((Var*)((Call*)e)->eFun)->name, ((Call*)e)->args, fbody, letbody);
 		} break;

@@ -3,5 +3,27 @@ let fib(n) =
 		n 
 	else 
 		fib(n-1) + fib(n-2) 
-	in fib(15) 
+	//in fib(10)
 end
+
+let max(a,b) =
+	if a < b then
+		b
+	else
+		a
+end
+
+let pow(x, n) = 
+	if n == 0 then
+		1
+	else
+		x * pow(x, n-1)
+end
+
+let cylinderVolume(radius, length) =
+	let pi = 3 in
+		length * pi * pow(radius, 2) 
+	end
+end
+
+max(cylinderVolume(3,4), cylinderVolume(3,5))

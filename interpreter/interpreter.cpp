@@ -18,16 +18,39 @@ Value* eval(Expression* e, symtable<Value*>* env) {
 	} break;
 	case E_LetBinding: {
 		Value* xval = eval(((Let*)e)->binding, env);
-		env->enter();
-		env->bind(xval, ((Var*)((Let*)e)->variable)->name);
-		Value* returnval = eval(((Let*)e)->expr, env); // Evaluate the expression in-scope.
-		env->exit();
-		return returnval;
+		if (((Let*)e)->expr != NULL) {
+			symtable<Value*> letbodyenv = *env;
+			letbodyenv.bind(xval, ((Var*)((Let*)e)->variable)->name);
+			return eval(((Let*)e)->expr, &letbodyenv); // Evaluate the expression in-scope.
+		}
+		else {
+			env->bind(xval, ((Var*)((Let*)e)->variable)->name);
+			return NULL;
+			break;
+		}
 	} break;
 	case E_LetFun: {
-		symtable<Value*> bodyenv = *env;
-		bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), *env),(((LetFun*)e)->f));
-		return eval(((LetFun*)e)->letbody, &bodyenv);
+		if (((LetFun*)e)->letbody != NULL) {
+			symtable<Value*> bodyenv = *env;
+			bodyenv.bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), *env), (((LetFun*)e)->f));
+			return eval(((LetFun*)e)->letbody, &bodyenv);
+		}
+		else {
+			// The function will be called later
+			env->bind(MakeClosureVal((((LetFun*)e)->f), (((LetFun*)e)->x), (((LetFun*)e)->fbody), *env), (((LetFun*)e)->f));
+			break;
+		}
+	} break;
+	case E_Print: {
+		Value* v = eval(((Print*)e)->expr, env);
+		switch (v->vType) {
+		case V_Integer: {
+			printf("%d\n", (((IntVal*)v)->i));
+		} break;
+		default:
+			FatalError("InterpreterError: Couldn't print expression.");
+		}
+		return NULL;
 	} break;
 	case E_Call: {
 		auto fClosure = eval(((Call*)e)->eFun, env);
@@ -135,7 +158,12 @@ std::string toString(Expression* e) {
 		buffer << "(" << toString(((Paren*)e)->expr) << ")";
 	} break;
 	case E_LetBinding: {
-		buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " in " << toString(((Let*)e)->expr) << " end";
+		if (((Let*)e)->expr != NULL) {
+			buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) << " in " << toString(((Let*)e)->expr) << " end";
+		}
+		else {
+			buffer << "let " << toString(((Let*)e)->variable) << " = " << toString(((Let*)e)->binding) <<  " end";
+		}
 	} break;
 	case E_LetFun: {
 		Exp** x = (Exp**)((Call*)e)->args.buffer;
@@ -150,7 +178,12 @@ std::string toString(Expression* e) {
 		else {
 			buffer << toString(x[0]);
 		}
-		buffer << ") = " << toString(((LetFun*)e)->fbody) << " in " << toString(((LetFun*)e)->letbody) << " end";
+		if (((LetFun*)e)->letbody != NULL) {
+			buffer << ") = " << toString(((LetFun*)e)->fbody) << " in " << toString(((LetFun*)e)->letbody) << " end";
+		}
+		else {
+			buffer << ") = " << toString(((LetFun*)e)->fbody) << " end";
+		}
 	} break;
 	case E_Call: {
 		Exp** x = (Exp**)((Call*)e)->args.buffer;

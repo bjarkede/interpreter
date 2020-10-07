@@ -90,3 +90,10 @@ Expression* UnaryExp(UnOpType op, Expression* expr) {
 	return e;
 }
 
+Expression* PrintExp(Expression* expr) {
+	Print* e = (Print*)malloc(sizeof(Print));
+	e->expType = E_Print;
+	e->expr = expr;
+	return e;
+}
+

@@ -28,20 +28,26 @@ int main(int argc, char** argv) {
 	// If we use a large hashmap, a lot of memory will be allocated at each
 	// recursive call in the interpreter.
 	// Consider an alternative. -bjarke, 6th octobor 2020.
-	valueenv.empty(13);
+	valueenv.empty(20);
 
 	for (auto& e : expList) {
-		PrintDebug("Expression: %s\n", toString(e).c_str());
+
 		auto v = eval(e, &valueenv);
 		if (v != nullptr) {
+
 			switch (v->vType) {
-			case V_Integer: { PrintDebug("Value: %d\n\n", ((IntVal*)v)->i); } break;
+			case V_Integer: { 
+				// Only print if the expression returns an integer
+				PrintDebug("Expression: %s\n", toString(e).c_str());
+				PrintDebug("Value: %d\n\n", ((IntVal*)v)->i); 
+			} break;
 			default:
 			{}
 			}
 		}
 	}
 
+	printf("\n");
     PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
 
     return 1;

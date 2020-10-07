@@ -38,6 +38,7 @@ enum ExpressionType
 	E_Call,
 	E_UnOp,
 	E_Paren,
+	E_Print,
 	E_NoType,
 	E_Count
 };
@@ -93,6 +94,10 @@ typedef struct IfThenElse : public Expression {
 	Expression* elseexp;
 } If;
 
+typedef struct Print : public Expression {
+	Expression* expr;
+} Print;
+
 // Empty
 Expression* EmptyExp();
 
@@ -114,5 +119,8 @@ Expression* IfThenElseExp(Expression* ifexp, Expression* thenexp, Expression* el
 Expression* LetExp(Expression* var, Expression* binding, Expression* expr);
 Expression* LetFunExp(const char* f, Buffer x, Expression* fbody, Expression* letbody);
 Expression* CallExp(Expression* eFun, Buffer args);
+
+// Helpers
+Expression* PrintExp(Expression* expr);
 
 #endif

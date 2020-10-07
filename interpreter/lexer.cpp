@@ -68,6 +68,14 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
             }
             return '=';
         } break;
+        case '/':
+        {
+            next(ls);
+            if (ls->currentChar != '/') return '/';
+            while (ls->currentChar != '\n' || ls->currentChar != '\r' && ls->currentChar == EOZ) {
+                next(ls);
+            } break;
+        } break;
         case '\0': {
             return TK_EOZ;
         } break;
@@ -225,4 +233,16 @@ static void InclineLineNumber(LexerState* ls) {
         FatalError("Read too many lines in current chunk. Integer overflow.\n");
 
     ls->t.col = 0;
+}
+
+static size_t skip_comment(LexerState* ls) {
+    size_t count = 0;
+    int s = ls->currentChar;
+    assert(s == '*');
+    save_and_next(ls);
+    while (ls->currentChar == '=') {
+        save_and_next(ls);
+        count++;
+    }
+    return (ls->currentChar == s) ? count + 2 : (count == 0) ? 1 : 0;
 }
