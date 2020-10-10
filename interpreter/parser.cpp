@@ -187,7 +187,13 @@ static BinaryOpType GetBinaryOperator(int op) {
 	}
 }
 
-Exp* ParseExpressionOperand(LexerState*ls) {
+Exp* ParseExpressionCompound(LexerState* ls) {
+	check_match(ls, '{', '{', ls->t.line);
+	check_match(ls, '}', '{', ls->t.line);
+	return NULL;
+}
+
+Exp* ParseExpressionOperand(LexerState* ls) {
 	switch (ls->t.token) {
 	case TK_INT: { unsigned long long val = ls->t.semInfo.i; ProcessNextToken(ls); return IntegerExp(val); } break;
 	case TK_VAR: { L_STRING* val = ls->t.semInfo.s; ProcessNextToken(ls); return VariableExp(val); } break;
@@ -239,6 +245,7 @@ Exp* ParseExpressionOperand(LexerState*ls) {
 			check_match(ls, TK_END, TK_END, ls->t.line);
 			return LetFunExp(((Var*)((Call*)e)->eFun)->name, ((Call*)e)->args, fbody, letbody);
 		} break;
+	
 		default:
 			FatalError("SyntaxError: Invalid input: %c, Line: %d[%d ].", (char)ls->t.token, ls->t.line, ls->t.col);
 		}

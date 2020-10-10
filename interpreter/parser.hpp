@@ -24,6 +24,8 @@ Exp* ParseExpressionMul(LexerState* ls);
 Exp* ParseExpressionUnary(LexerState* ls);
 Exp* ParseExpressionBase(LexerState* ls);
 
+Exp* ParseExpressionCompound(LexerState* ls);
+
 // Helpers in general.
 void check_match(LexerState* ls, int what, int who, int where);
 bool test_next(LexerState* ls, int c);

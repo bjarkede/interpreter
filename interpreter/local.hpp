@@ -5,6 +5,7 @@
 
 #define L_INTEGER int64_t
 #define L_BOOL bool
+#define L_NUMBER double
 
 typedef struct L_STRING {
 	u8 flags;
@@ -15,6 +16,14 @@ typedef struct L_STRING {
 	} u;
 	const char* contents;
 } L_STRING;
+
+typedef union L_VALUE {
+	typedef union Value {
+		L_INTEGER i;
+		L_BOOL b;
+		L_NUMBER d;
+	} Value;
+} L_VALUE;
 
 enum RESERVED {
 	TK_LET, TK_IF, TK_THEN, TK_ELSE, TK_IN, TK_END,

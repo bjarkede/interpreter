@@ -31,10 +31,8 @@ int main(int argc, char** argv) {
 	valueenv.empty(20);
 
 	for (auto& e : expList) {
-
 		auto v = eval(e, &valueenv);
 		if (v != nullptr) {
-
 			switch (v->vType) {
 			case V_Integer: { 
 				// Only print if the expression returns an integer
@@ -47,7 +45,6 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	printf("\n");
     PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
 
     return 1;
