@@ -49,7 +49,7 @@ int ProcessLookAHeadToken(LexerState* ls) {
     return ls->lookahead.token;
 }
 
-static int Lex(LexerState* ls, SemanticInfo* semInfo) {
+int Lex(LexerState* ls, SemanticInfo* semInfo) {
     //ls->TBuffer.buffer = 0; // Maybe add more buffer functions to the struct.
     semInfo->s = 0;
     for (;;) {
@@ -123,7 +123,7 @@ static int Lex(LexerState* ls, SemanticInfo* semInfo) {
     }
 }
 
-static RESERVED SingleCharToToken(int op) {
+RESERVED SingleCharToToken(int op) {
     switch (op) {
     case '(': return TK_SEPL;
     case ')': return TK_SEPR;
@@ -134,7 +134,7 @@ static RESERVED SingleCharToToken(int op) {
     }
 }
 
-static bool IsReserved(L_STRING* str) {
+bool IsReserved(L_STRING* str) {
     for (int i = 0; i < ARRAY_LEN(tokens); i++) {
         if (strcmp(str->contents, tokens[i]) == 0) {
             str->flags = i;
@@ -144,7 +144,7 @@ static bool IsReserved(L_STRING* str) {
     return false;
 }
 
-static L_STRING* CreateVariableString(LexerState* ls, const char* str, size_t l) {
+L_STRING* CreateVariableString(LexerState* ls, const char* str, size_t l) {
     L_STRING* s = (L_STRING*)malloc(sizeof(L_STRING));
 
     // Allocate memory for the string
@@ -160,7 +160,7 @@ static L_STRING* CreateVariableString(LexerState* ls, const char* str, size_t l)
 }
 
 // TODO:
-static int ReadNumeralLiteral(LexerState* ls, SemanticInfo* semInfo) {
+int ReadNumeralLiteral(LexerState* ls, SemanticInfo* semInfo) {
     int first = ls->currentChar;
     int value = 0;
 
@@ -183,7 +183,7 @@ static int ReadNumeralLiteral(LexerState* ls, SemanticInfo* semInfo) {
     
 }
 
-static bool StringToNumber(LexerState* ls, int* value) {
+bool StringToNumber(LexerState* ls, int* value) {
 
     unsigned int result = 0;
     int negative;
@@ -203,7 +203,7 @@ static bool StringToNumber(LexerState* ls, int* value) {
     return true;
 }
 
-static void SaveToken(LexerState* ls, int c) {
+void SaveToken(LexerState* ls, int c) {
     // if we are about to write out of memory
     if (ls->TBuffer.writeIndex + 1 > ls->TBuffer.length) {
         if (ls->TBuffer.old_buffer) delete[] ls->TBuffer.old_buffer;
@@ -223,7 +223,7 @@ static void SaveToken(LexerState* ls, int c) {
     ((char*)ls->TBuffer.buffer)[ls->TBuffer.writeIndex++] = (char)c;
 }
 
-static void InclineLineNumber(LexerState* ls) {
+void InclineLineNumber(LexerState* ls) {
     int old = ls->currentChar;
     assert(ls->currentChar == '\n' || ls->currentChar == '\r');
     next(ls);
@@ -235,7 +235,7 @@ static void InclineLineNumber(LexerState* ls) {
     ls->t.col = 0;
 }
 
-static size_t skip_comment(LexerState* ls) {
+size_t skip_comment(LexerState* ls) {
     size_t count = 0;
     int s = ls->currentChar;
     assert(s == '*');

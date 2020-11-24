@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 		expList.push_back(ParseExpression(ls));
 	}
 
-	PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
+	//PrintDebug("SyntaxMessage: Input accepted by parser.\n\n");
 
 	// @TODO:
 	// The by value passing of the valueenv is a major bottleneck.
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 
 	for (auto& e : expList) {
 		auto v = eval(e, &valueenv);
-		if (v != nullptr) {
+		/*if (v != nullptr) {
 			switch (v->vType) {
 			case V_Integer: { 
 				// Only print if the expression returns an integer
@@ -42,10 +42,10 @@ int main(int argc, char** argv) {
 			default:
 			{}
 			}
-		}
+		}*/
 	}
 
-    PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
+    //PrintDebug("Finished lexing, parsing and interpreting file: %s\n", argv[1]);
 
     return 1;
 }

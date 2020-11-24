@@ -1,7 +1,7 @@
 #include "parser.hpp"
 #include "ast.hpp"
 
-static bool test_next(LexerState* ls, int c) {
+bool test_next(LexerState* ls, int c) {
 	if (ls->t.token == c) {
 		ProcessNextToken(ls);
 		return true;
@@ -11,7 +11,7 @@ static bool test_next(LexerState* ls, int c) {
 	}
 }
 
-static bool test(LexerState* ls, int c) {
+bool test(LexerState* ls, int c) {
 	if (ls->t.token == c) {
 		return true;
 	}
@@ -20,7 +20,7 @@ static bool test(LexerState* ls, int c) {
 	}
 }
 
-static void check_match(LexerState* ls, int what, int who, int where) {
+void check_match(LexerState* ls, int what, int who, int where) {
 	if (!test_next(ls, what)) {
 		if (where == ls->lineNumber) {
 			FatalError("SyntaxError: Failed when checking match %d", what);
@@ -31,13 +31,13 @@ static void check_match(LexerState* ls, int what, int who, int where) {
 	}
 }
 
-static bool check(LexerState* ls, int c) {
+bool check(LexerState* ls, int c) {
 	if (ls->t.token != c)
 		return false;
 	return true;
 }
 
-static bool check_next(LexerState* ls, int c) {
+bool check_next(LexerState* ls, int c) {
 	if (check(ls, c)) {
 		ProcessNextToken(ls);
 		return true;
@@ -49,11 +49,11 @@ Exp* ParseExpression(LexerState* ls) {
 	return ParseExpressionTernary(ls);
 }
 
-static bool IsUnaryOperator(LexerState* ls) {
+bool IsUnaryOperator(LexerState* ls) {
 	return test(ls, '+') || test(ls, '-') || test(ls, '*') || test(ls, '&');
 }
 
-static Exp* ParseExpressionBase(LexerState* ls) {
+Exp* ParseExpressionBase(LexerState* ls) {
 	Exp* expr = ParseExpressionOperand(ls);
 	int len = 0;
 	while (test(ls, '(') || test(ls, '[') || test(ls, '.')) {
@@ -76,7 +76,7 @@ static Exp* ParseExpressionBase(LexerState* ls) {
 	return expr;
 }
 
-static Exp* ParseExpressionUnary(LexerState* ls) {
+Exp* ParseExpressionUnary(LexerState* ls) {
 	if (IsUnaryOperator(ls)) {
 		UnOpType op = GetUnaryOperator(ls->t.token);
 		ProcessNextToken(ls);
@@ -87,11 +87,11 @@ static Exp* ParseExpressionUnary(LexerState* ls) {
 	}
 }
 
-static bool IsMulOperator(LexerState* ls) {
+bool IsMulOperator(LexerState* ls) {
 	return test(ls, '*') || test(ls, '/') || test(ls, '%') || test(ls, '&');
 }
 
-static Exp* ParseExpressionMul(LexerState* ls) {
+Exp* ParseExpressionMul(LexerState* ls) {
 	Exp* expr = ParseExpressionUnary(ls);
 	while (IsMulOperator(ls)) {
 		BinaryOpType op = GetBinaryOperator(ls->t.token);
@@ -102,11 +102,11 @@ static Exp* ParseExpressionMul(LexerState* ls) {
 	return expr;
 }
 
-static bool IsAddOperator(LexerState* ls) {
+bool IsAddOperator(LexerState* ls) {
 	return test(ls, '+') || test(ls, '-') || test(ls, '|') || test(ls, '^');
 }
 
-static Exp* ParseExpressionAdd(LexerState* ls) {
+Exp* ParseExpressionAdd(LexerState* ls) {
 	Exp* expr = ParseExpressionMul(ls);
 	while (IsAddOperator(ls)) {
 		BinaryOpType op = GetBinaryOperator(ls->t.token);
@@ -116,11 +116,11 @@ static Exp* ParseExpressionAdd(LexerState* ls) {
 	return expr;
 }
 
-static bool IsCompOperator(LexerState* ls) {
+bool IsCompOperator(LexerState* ls) {
 	return test(ls, '<') || test(ls, '>') || test(ls, TK_EQ) || test(ls, TK_LE);
 }
 
-static Exp* ParseExpressionCompare(LexerState* ls) {
+Exp* ParseExpressionCompare(LexerState* ls) {
 	Exp* expr = ParseExpressionAdd(ls);
 	while (IsCompOperator(ls)) {
 		BinaryOpType op = GetBinaryOperator(ls->t.token);
@@ -130,7 +130,7 @@ static Exp* ParseExpressionCompare(LexerState* ls) {
 	return expr;
 }
 
-static Exp* ParseExpressionAnd(LexerState* ls) {
+Exp* ParseExpressionAnd(LexerState* ls) {
 	Exp* expr = ParseExpressionCompare(ls);
 	while (check_next(ls, TK_AND)) {
 		expr = BinaryExp(And, expr, ParseExpressionCompare(ls));
@@ -138,7 +138,7 @@ static Exp* ParseExpressionAnd(LexerState* ls) {
 	return expr;
 }
 
-static Exp* ParseExpressionOr(LexerState* ls) {
+Exp* ParseExpressionOr(LexerState* ls) {
 	Exp* expr = ParseExpressionAnd(ls);
 	while (check_next(ls, TK_OR)) {
 		expr = BinaryExp(Or, expr, ParseExpressionAnd(ls));
@@ -146,7 +146,7 @@ static Exp* ParseExpressionOr(LexerState* ls) {
 	return expr;
 }
 
-static Exp* ParseExpressionTernary(LexerState* ls) {
+Exp* ParseExpressionTernary(LexerState* ls) {
 	Exp* expr = ParseExpressionOr(ls);
 	
 	// @TODO:
@@ -154,14 +154,14 @@ static Exp* ParseExpressionTernary(LexerState* ls) {
 	return expr;
 }
 
-static Exp* ParseParenthesisedExpression(LexerState* ls) {
+Exp* ParseParenthesisedExpression(LexerState* ls) {
 	check(ls, '(');
 	Exp* expr = ParseExpression(ls);
 	check(ls, ')');
 	return expr;
 }
 
-static UnOpType GetUnaryOperator(int op) {
+UnOpType GetUnaryOperator(int op) {
 	switch (op) {
 	case '!': return Not;
 	case '-': return Minus;
@@ -172,7 +172,7 @@ static UnOpType GetUnaryOperator(int op) {
 	}
 }
 
-static BinaryOpType GetBinaryOperator(int op) {
+BinaryOpType GetBinaryOperator(int op) {
 	switch (op) {
 	case '+': return Add;
 	case '-': return Sub;

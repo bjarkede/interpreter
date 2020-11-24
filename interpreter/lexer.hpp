@@ -19,8 +19,8 @@ void SaveToken(LexerState* ls, int c);
 void ProcessNextToken(LexerState* ls);
 int ProcessLookAHeadToken(LexerState* ls);
 
-static bool StringToNumber(LexerState* ls, int* value);
-static bool IsReserved(L_STRING* str);
+bool StringToNumber(LexerState* ls, int* value);
+bool IsReserved(L_STRING* str);
 L_STRING* CreateVariableString(LexerState* ls, const char* str, size_t l);
 
 static const char* const tokenStrings[] = {

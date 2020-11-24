@@ -134,6 +134,15 @@ Value* eval(Expression* e, symtable<Value*>* env) {
 	case E_Paren: {
 		return eval(((Paren*)e)->expr, env);
 	} break;
+	case E_UnOp: {
+		Value* v = eval(((UnOp*)e)->expr, env);
+		if (v->vType == V_Integer) {
+			if ((((UnOp*)e)->opType == Minus)) {
+				(((IntVal*)v)->i) = (((IntVal*)v)->i) * -1;
+			}
+		}
+		return v;
+	} break;
 	}
 }
 
@@ -203,6 +212,15 @@ std::string toString(Expression* e) {
 	case E_IfThenElse: {
 		buffer << "if " << toString(((If*)e)->ifexp) << " then " << toString(((If*)e)->thenexp) << " else " << toString(((If*)e)->elseexp);
 	} break;
+	case E_UnOp: {
+		switch ((((UnOp*)e)->opType)) {
+		case Minus: {
+			buffer << "-" << toString(((UnOp*)e)->expr);
+		} break;
+		default:
+			break;
+		}
+	}
 	default:
 		buffer << "";
 	}

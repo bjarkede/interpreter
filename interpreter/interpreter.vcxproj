@@ -156,6 +156,7 @@
     <ClInclude Include="parser.hpp" />
     <ClInclude Include="shared.hpp" />
     <ClInclude Include="symtable.hpp" />
+    <ClInclude Include="typecheck.hpp" />
     <ClInclude Include="typechecker.hpp" />
   </ItemGroup>
   <ItemGroup>

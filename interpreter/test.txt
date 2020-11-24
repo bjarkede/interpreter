@@ -1,15 +1,14 @@
-let fib(n) = 
-	if n < 2 then
-		n
-	else
-		fib(n-1) + fib(n-2)
+let max(a, b) =
+	if a < b then b else a
 end
 
-fib(10)
-
-let cubeMe(x) = 
-	let squareMe(x) = x * x in squareMe(x) * 3 end
+let min(a, b) =
+	if a < b then a else b
 end
 
-cubeMe(3)
-squareMe(2)
+let clamp(value, lower, upper) =
+	max(lower, min(value, upper))
+end
+
+print(clamp(10, 0, 5))
+print(max(20,5))

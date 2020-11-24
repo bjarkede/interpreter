@@ -65,6 +65,9 @@
     <ClInclude Include="typechecker.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="typecheck.hpp">
+      <Filter>Header Files\templates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="test.txt">
