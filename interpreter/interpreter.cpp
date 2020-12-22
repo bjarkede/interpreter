@@ -6,6 +6,8 @@ Value* lookup(const char* name, symtable<Value*>* env) {
 	return result;
 }
 
+
+
 Value* eval(Expression* e, symtable<Value*>* env) {
 	switch (e->expType) {
 	case E_Integer:
