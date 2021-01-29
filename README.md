@@ -11,11 +11,11 @@ This is a work in progress interpreter that implements its own lexical- and synt
 
 | Sub-project | Purpose | Status |
 | :--|:--|:--|
-| Error messages | The interpreter outputs precise and informative error messages. | In progress |
-| Optimized interpreter | The interpreter is optimized to combat slower execution times compared to a compiler. | In progress |
+| Error messages | The interpreter outputs precise and informative error messages. | T.B.D |
+| Optimized interpreter | The interpreter is optimized to combat slower execution times compared to a compiler. | T.B.D |
 | Lexical analysis | The interpreter uses a self-coded lexer to read and divide text into tokens. | In progress |
 | Syntax analysis | The interpreter uses a self-coded parser that takes the output from the lexing and produce a syntax tree. | In progress |
-| Type checking | The syntax tree optained from the parsing stage is analyzed to determine if the program violates consistency requirements. | In Progress |
+| Type checking | The syntax tree optained from the parsing stage is analyzed to determine if the program violates consistency requirements. | T.B.D |
 
 | Feature | Support |
 | :--|:--|
@@ -24,8 +24,8 @@ This is a work in progress interpreter that implements its own lexical- and synt
 | Variable substitution | YES |
 | Free variables | YES |
 | First- and higher order functions | YES |
-| Type checking | YES |
-| Tuples and selectors | YES |
+| Type checking | NO |
+| Tuples and selectors | No |
 
 ## References
 
